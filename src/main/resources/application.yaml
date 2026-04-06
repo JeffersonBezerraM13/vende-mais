@@ -1,0 +1,20 @@
+spring:
+  config:
+    import: "optional:file:.env[.properties]"
+  application:
+    name: demo
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE}
+
+  jpa:
+    open-in-view: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
