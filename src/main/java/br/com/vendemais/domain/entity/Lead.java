@@ -1,9 +1,6 @@
 package br.com.vendemais.domain.entity;
 
-import br.com.vendemais.domain.enums.LeadOrigin;
-import br.com.vendemais.domain.enums.LegalEntities;
-import br.com.vendemais.domain.enums.Registrarion;
-import br.com.vendemais.domain.enums.SolutionInterest;
+import br.com.vendemais.domain.enums.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,47 +24,46 @@ public class Lead {
     private String name;
 
     @NotBlank(message = "Telefone não pode ser vazio")
-    private String phoneNumber;
+    private String phone;
 
     @NotBlank(message = "Email não pode ser vazio")
     @Email
     private String email;
 
-    private LegalEntities legalEntities;
+    private PersonType personType;
 
-    private String EnterpriseName;
+    private String companyName;
 
-    private SolutionInterest soluctionInterest;
+    private InterestSolution interestSoluction;
 
     @NotNull(message = "Origem do lead não pode ser vazia")
-    private LeadOrigin leadOrigin;
+    private LeadSource leadSource;
 
-    @NotNull (message = "Forma de registor do lead não pode ser vazia")
-    private Registrarion registration;
+    @NotNull (message = "Forma de registro do lead não pode ser vazia")
+    private EntryMethod entryMethod;
 
-    //lead com status desqualificado não pode ser convertido em oportunidade
+    //lead com status 'desqualified' não pode ser convertido em oportunidade
     //lead convertido continua existindo, mas deve ficar marcado como convertido
-    private String leadStatus;
+    private LeadStatus leadStatus;
 
-    private String observations;
+    private String notes;
 
     private LocalDate createdAt;
 
     private LocalDate updatedAt;
 
-    public Lead(String name, String phoneNumber, String email, LegalEntities legalEntities, String enterpriseName, SolutionInterest soluctionInterest, LeadOrigin leadOrigin, Registrarion registration, String leadStatus, String observations, LocalDate createdAt, LocalDate updatedAt) {
+    public Lead(String name, String phone, String email, PersonType personType, String companyName, InterestSolution interestSoluction, LeadSource leadSource, EntryMethod entryMethod, LeadStatus leadStatus, String notes) {
         this.name = name;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
         this.email = email;
-        this.legalEntities = legalEntities;
-        EnterpriseName = enterpriseName;
-        this.soluctionInterest = soluctionInterest;
-        this.leadOrigin = leadOrigin;
-        this.registration = registration;
+        this.personType = personType;
+        this.companyName = companyName;
+        this.interestSoluction = interestSoluction;
+        this.leadSource = leadSource;
+        this.entryMethod = entryMethod;
         this.leadStatus = leadStatus;
-        this.observations = observations;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.notes = notes;
+        this.createdAt = LocalDate.now();
     }
 
     protected Lead() {}
@@ -90,12 +86,12 @@ public class Lead {
         this.name = name;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getEmail() {
@@ -106,60 +102,60 @@ public class Lead {
         this.email = email;
     }
 
-    public LegalEntities getLegalEntities() {
-        return legalEntities;
+    public PersonType getLegalEntities() {
+        return personType;
     }
 
-    public void setLegalEntities(LegalEntities legalEntities) {
-        this.legalEntities = legalEntities;
+    public void setLegalEntities(PersonType personType) {
+        this.personType = personType;
     }
 
-    public String getEnterpriseName() {
-        return EnterpriseName;
+    public String getCompanyName() {
+        return companyName;
     }
 
-    public void setEnterpriseName(String enterpriseName) {
-        EnterpriseName = enterpriseName;
+    public void setCompanyName(String companyName) {
+        companyName = companyName;
     }
 
-    public SolutionInterest getSoluctionInterest() {
-        return soluctionInterest;
+    public InterestSolution getSoluctionInterest() {
+        return interestSoluction;
     }
 
-    public void setSoluctionInterest(SolutionInterest soluctionInterest) {
-        this.soluctionInterest = soluctionInterest;
+    public void setSoluctionInterest(InterestSolution soluctionInterest) {
+        this.interestSoluction = soluctionInterest;
     }
 
-    public LeadOrigin getLeadOrigin() {
-        return leadOrigin;
+    public LeadSource getLeadOrigin() {
+        return leadSource;
     }
 
-    public void setLeadOrigin(LeadOrigin leadOrigin) {
-        this.leadOrigin = leadOrigin;
+    public void setLeadOrigin(LeadSource leadSource) {
+        this.leadSource = leadSource;
     }
 
-    public Registrarion getRegistration() {
-        return registration;
+    public EntryMethod getEntryMethod() {
+        return entryMethod;
     }
 
-    public void setRegistration(Registrarion registration) {
-        this.registration = registration;
+    public void setEntryMethod(EntryMethod entryMethod) {
+        this.entryMethod = entryMethod;
     }
 
-    public String getLeadStatus() {
+    public LeadStatus getLeadStatus() {
         return leadStatus;
     }
 
-    public void setLeadStatus(String leadStatus) {
+    public void setLeadStatus(LeadStatus leadStatus) {
         this.leadStatus = leadStatus;
     }
 
-    public String getObservations() {
-        return observations;
+    public String getNotes() {
+        return notes;
     }
 
-    public void setObservations(String observations) {
-        this.observations = observations;
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public LocalDate getCreatedAt() {

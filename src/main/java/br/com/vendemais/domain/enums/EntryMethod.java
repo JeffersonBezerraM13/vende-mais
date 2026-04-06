@@ -1,6 +1,6 @@
 package br.com.vendemais.domain.enums;
 
-public enum Registrarion {
+public enum EntryMethod {
     MANUAL,
     IMPORTED,
     INTEGRATION

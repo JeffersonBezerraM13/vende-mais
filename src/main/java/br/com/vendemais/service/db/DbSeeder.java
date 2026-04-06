@@ -1,10 +1,7 @@
 package br.com.vendemais.service.db;
 
 import br.com.vendemais.domain.entity.Lead;
-import br.com.vendemais.domain.enums.LeadOrigin;
-import br.com.vendemais.domain.enums.LegalEntities;
-import br.com.vendemais.domain.enums.Registrarion;
-import br.com.vendemais.domain.enums.SolutionInterest;
+import br.com.vendemais.domain.enums.*;
 import br.com.vendemais.repository.LeadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,15 +22,13 @@ public class DbSeeder {
                 "Ana Grey",
                 "83998765432",
                 "ana@gmail.com",
-                LegalEntities.NATURAL_PERSON,
+                PersonType.INDIVIDUAL,
                 null,
-                SolutionInterest.SELF_STORAGE,
-                LeadOrigin.WHATSAPP,
-                Registrarion.MANUAL,
-                "IN_PROGRESS",
-                "Sem observação",
-                LocalDate.of(2025,3,26),
-                LocalDate.now()
+                InterestSolution.SELF_STORAGE,
+                LeadSource.WHATSAPP,
+                EntryMethod.MANUAL,
+                LeadStatus.NEW,
+                "Sem observação"
         );
 
         leadRepository.saveAll(Arrays.asList(lead1));

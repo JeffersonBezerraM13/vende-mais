@@ -1,9 +1,9 @@
 package br.com.vendemais.domain.enums;
 
-public enum LeadOrigin {
+public enum LeadSource {
     SITE,
     WHATSAPP,
-    CALL,
-    REFERRER,
+    PHONE_CALL,
+    REFERRAL,
     IN_PERSON
 }
