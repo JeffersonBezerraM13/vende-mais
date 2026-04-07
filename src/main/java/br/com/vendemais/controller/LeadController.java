@@ -1,5 +1,6 @@
 package br.com.vendemais.controller;
 
+import br.com.vendemais.domain.dtos.lead.LeadRequestDTO;
 import br.com.vendemais.domain.dtos.lead.LeadResponseDTO;
 import br.com.vendemais.service.LeadService;
 import org.springframework.data.domain.Page;
@@ -7,9 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 
 @RestController
@@ -29,5 +31,36 @@ public class LeadController {
             @PageableDefault(page = 0,size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         Page<LeadResponseDTO> page = leadService.findAll(pageable);
         return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<LeadResponseDTO> findById(@PathVariable Long id){
+        LeadResponseDTO leadResponseDTO = leadService.findById(id);
+        return ResponseEntity.ok().body(leadResponseDTO);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<LeadResponseDTO> create(@RequestBody LeadRequestDTO leadRequestDTO){
+        LeadResponseDTO leadResponseDTO = leadService.create(leadRequestDTO);
+
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(
+                        leadResponseDTO.id()
+                ).toUri();
+
+        return ResponseEntity.created(uri).body(leadResponseDTO);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<LeadResponseDTO> update(@PathVariable Long id,@RequestBody LeadRequestDTO leadRequestDTO){
+        return ResponseEntity.ok(leadService.update(id, leadRequestDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        leadService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -102,11 +102,11 @@ public class Lead {
         this.email = email;
     }
 
-    public PersonType getLegalEntities() {
+    public PersonType getPersonType() {
         return personType;
     }
 
-    public void setLegalEntities(PersonType personType) {
+    public void setPersonType(PersonType personType) {
         this.personType = personType;
     }
 
@@ -118,19 +118,19 @@ public class Lead {
         companyName = companyName;
     }
 
-    public Solution getSoluctionInterest() {
+    public Solution getInterestSolution() {
         return interestSolution;
     }
 
-    public void setSoluctionInterest(Solution soluctionInterest) {
+    public void setInterestSoluction(Solution soluctionInterest) {
         this.interestSolution = soluctionInterest;
     }
 
-    public LeadSource getLeadOrigin() {
+    public LeadSource getLeadSource() {
         return leadSource;
     }
 
-    public void setLeadOrigin(LeadSource leadSource) {
+    public void setLeadSource(LeadSource leadSource) {
         this.leadSource = leadSource;
     }
 

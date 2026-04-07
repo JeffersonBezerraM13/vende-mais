@@ -1,6 +1,5 @@
 package br.com.vendemais.service.db;
 
-import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
 import br.com.vendemais.domain.entity.*;
 import br.com.vendemais.domain.enums.*;
 import br.com.vendemais.repository.*;
@@ -101,7 +100,7 @@ public class DbSeeder {
 
         Opportunity op1lead1 = new Opportunity(
                 lead1,
-                lead1.getSoluctionInterest().name() +" - "+ lead1.getName(),
+                lead1.getInterestSolution().name() +" - "+ lead1.getName(),
                 Solution.SELF_STORAGE,
                 new BigDecimal("1000.00"),
                 pipeline1op1,
