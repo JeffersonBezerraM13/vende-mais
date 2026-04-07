@@ -1,6 +1,6 @@
 package br.com.vendemais.domain.enums;
 
-public enum Status {
+public enum TaskStatus {
     PENDING,
     COMPLETED
 }

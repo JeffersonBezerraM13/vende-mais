@@ -1,6 +1,6 @@
 package br.com.vendemais.domain.enums;
 
-public enum InterestSolution {
+public enum Solution {
     SELF_STORAGE,
     COWORKING,
     FISCAL_ADDRESS,
