@@ -41,6 +41,7 @@ public class UserService {
         }
 
         User User = new User(
+                userRequestDTO.name(),
                 userRequestDTO.email(),
                 encoder.encode(userRequestDTO.password())
         );

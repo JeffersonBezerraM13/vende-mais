@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record UserRequestDTO(
+        @NotBlank(message = "O nome não pode ser vazio")
+        String name,
+
         @NotBlank(message = "O email não pode ser vazio")
         @Email(message = "Formato de email inválido")
         String email,

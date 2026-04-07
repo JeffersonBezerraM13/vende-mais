@@ -67,12 +67,14 @@ public class DbSeeder {
         leadRepository.saveAll(Arrays.asList(lead1,lead2));
 
         User userAdmin = new User(
+                "Albert Einstein",
                 "einstein@gmail.com",
                 encoder.encode("1234")
         );
         userAdmin.addRole(Role.ADMIN);
 
         User user1 = new User(
+                "Nikola Tesla",
                 "tesla@gmail.com",
                 encoder.encode("1234")
         );

@@ -26,5 +26,7 @@ temp/
 mvnw
 mvnw.cmd
 
+HELP.md
+
 #.env
 .env
