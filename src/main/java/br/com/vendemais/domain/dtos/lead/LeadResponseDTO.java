@@ -11,7 +11,7 @@ public record LeadResponseDTO(
         String email,
         PersonType personType,
         String companyName,
-        InterestSolution interestSoluction,
+        Solution interestSoluction,
         LeadSource leadSource,
         EntryMethod entryMethod,
         LeadStatus leadStatus,

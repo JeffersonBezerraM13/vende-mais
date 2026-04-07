@@ -18,7 +18,7 @@ public record LeadRequestDTO(
 
         PersonType personType,
         String companyName,
-        InterestSolution interestSoluction,
+        Solution interestSoluction,
 
         @NotNull(message = "Origem do lead não pode ser vazia")
         LeadSource leadSource,

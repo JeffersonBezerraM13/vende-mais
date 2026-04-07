@@ -34,7 +34,7 @@ public class Lead {
 
     private String companyName;
 
-    private InterestSolution interestSoluction;
+    private Solution interestSolution;
 
     @NotNull(message = "Origem do lead não pode ser vazia")
     private LeadSource leadSource;
@@ -42,7 +42,7 @@ public class Lead {
     @NotNull (message = "Forma de registro do lead não pode ser vazia")
     private EntryMethod entryMethod;
 
-    //lead com status 'desqualified' não pode ser convertido em oportunidade
+    //lead com LeadStatus 'desqualified' não pode ser convertido em oportunidade
     //lead convertido continua existindo, mas deve ficar marcado como convertido
     private LeadStatus leadStatus;
 
@@ -52,13 +52,13 @@ public class Lead {
 
     private LocalDate updatedAt;
 
-    public Lead(String name, String phone, String email, PersonType personType, String companyName, InterestSolution interestSoluction, LeadSource leadSource, EntryMethod entryMethod, LeadStatus leadStatus, String notes) {
+    public Lead(String name, String phone, String email, PersonType personType, String companyName, Solution interestSolution, LeadSource leadSource, EntryMethod entryMethod, LeadStatus leadStatus, String notes) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.personType = personType;
         this.companyName = companyName;
-        this.interestSoluction = interestSoluction;
+        this.interestSolution = interestSolution;
         this.leadSource = leadSource;
         this.entryMethod = entryMethod;
         this.leadStatus = leadStatus;
@@ -118,12 +118,12 @@ public class Lead {
         companyName = companyName;
     }
 
-    public InterestSolution getSoluctionInterest() {
-        return interestSoluction;
+    public Solution getSoluctionInterest() {
+        return interestSolution;
     }
 
-    public void setSoluctionInterest(InterestSolution soluctionInterest) {
-        this.interestSoluction = soluctionInterest;
+    public void setSoluctionInterest(Solution soluctionInterest) {
+        this.interestSolution = soluctionInterest;
     }
 
     public LeadSource getLeadOrigin() {
