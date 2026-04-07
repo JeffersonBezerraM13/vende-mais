@@ -19,7 +19,7 @@ public class UserService {
 
     private final BCryptPasswordEncoder encoder;
 
-    private UserService(UserRepository UserRepository, BCryptPasswordEncoder encoder) {
+    public UserService(UserRepository UserRepository, BCryptPasswordEncoder encoder) {
         this.UserRepository = UserRepository;
         this.encoder = encoder;
     };

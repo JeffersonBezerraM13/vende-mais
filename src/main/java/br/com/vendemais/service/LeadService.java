@@ -18,7 +18,7 @@ public class LeadService {
 
     private final LeadRepository leadRepository;
 
-    private LeadService(LeadRepository leadRepository) {
+    public LeadService(LeadRepository leadRepository) {
         this.leadRepository = leadRepository;
     };
 

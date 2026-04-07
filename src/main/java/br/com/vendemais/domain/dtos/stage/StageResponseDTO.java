@@ -4,14 +4,20 @@ import br.com.vendemais.domain.entity.Stage;
 
 public record StageResponseDTO(
         Long id,
-        Integer number,
-        String title
+        String name,
+        String code,
+        Integer position,
+        Boolean finalStage,
+        Long pipelineId
 ) {
     public static StageResponseDTO daEntidade(Stage entidade) {
         return new StageResponseDTO(
                 entidade.getId(),
-                entidade.getNumber(),
-                entidade.getTitle()
+                entidade.getName(),
+                entidade.getCode(),
+                entidade.getPosition(),
+                entidade.getFinalStage(),
+                entidade.getPipeline() != null ? entidade.getPipeline().getId() : null
         );
     }
 }

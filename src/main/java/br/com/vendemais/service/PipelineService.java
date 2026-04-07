@@ -2,20 +2,26 @@ package br.com.vendemais.service;
 
 import br.com.vendemais.domain.dtos.pipeline.PipelineRequestDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
+import br.com.vendemais.domain.dtos.stage.StageRequestDTO;
 import br.com.vendemais.domain.entity.Pipeline;
+import br.com.vendemais.domain.entity.Stage;
 import br.com.vendemais.repository.PipelineRepository;
+import br.com.vendemais.repository.StageRepository;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.nio.channels.Pipe;
 
 @Service
 public class PipelineService {
 
     private final PipelineRepository pipelineRepository;
 
-    private PipelineService(PipelineRepository pipelineRepository) {
+    public PipelineService(PipelineRepository pipelineRepository) {
         this.pipelineRepository = pipelineRepository;
     };
 

@@ -1,15 +1,26 @@
 package br.com.vendemais.domain.dtos.pipeline;
 
 import br.com.vendemais.domain.entity.Pipeline;
+import br.com.vendemais.domain.dtos.stage.StageResponseDTO;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public record PipelineResponseDTO(
         Long id,
-        String title
+        String title,
+        List<StageResponseDTO> stages
 ) {
     public static PipelineResponseDTO daEntidade(Pipeline entidade) {
         return new PipelineResponseDTO(
                 entidade.getId(),
-                entidade.getTitle() // Não incluí a lista de Stages aqui para simplificar, mas você pode adicionar se precisar carregar tudo junto!
+                entidade.getTitle(),
+                //a lista de entidades e transformamos em DTOs
+                entidade.getStages() != null ?
+                        entidade.getStages().stream()
+                                .map(StageResponseDTO::daEntidade)
+                                .collect(Collectors.toList())
+                        : List.of()
         );
     }
 }

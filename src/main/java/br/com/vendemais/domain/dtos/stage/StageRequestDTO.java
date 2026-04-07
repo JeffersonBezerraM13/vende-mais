@@ -4,9 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record StageRequestDTO(
-        @NotNull(message = "O número do estágio é obrigatório")
-        Integer number,
+        @NotBlank(message = "O nome do estágio não pode ser vazio")
+        String name,
 
-        @NotBlank(message = "O título do estágio não pode ser vazio")
-        String title
+        @NotBlank(message = "O código do estágio não pode ser vazio")
+        String code,
+
+        @NotNull(message = "A posição do estágio é obrigatória")
+        Integer position,
+
+        @NotNull(message = "A indicação de estágio final (true/false) é obrigatória")
+        Boolean finalStage
 ) {}

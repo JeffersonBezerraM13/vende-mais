@@ -2,7 +2,10 @@ package br.com.vendemais.controller;
 
 import br.com.vendemais.domain.dtos.pipeline.PipelineRequestDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
+import br.com.vendemais.domain.dtos.stage.StageRequestDTO;
+import br.com.vendemais.domain.dtos.stage.StageResponseDTO;
 import br.com.vendemais.service.PipelineService;
+import br.com.vendemais.service.StageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,8 +23,11 @@ public class PipelineController {
 
     private final PipelineService pipelineService;
 
-    public PipelineController(PipelineService pipelineService) {
+    private final StageService stageService;
+
+    public PipelineController(PipelineService pipelineService, StageService stageService) {
         this.pipelineService = pipelineService;
+        this.stageService = stageService;
     }
 
     @GetMapping
@@ -53,9 +59,19 @@ public class PipelineController {
         return ResponseEntity.created(uri).body(pipelineResponseDTO);
     }
 
+    @PostMapping("/{pipelineId}/stages/create")
+    public ResponseEntity<StageResponseDTO> createStage(@PathVariable Long pipelineId , @RequestBody StageRequestDTO stageRequestDTO){
+        return ResponseEntity.ok().body(stageService.createStage(pipelineId,stageRequestDTO));
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<PipelineResponseDTO> update(@PathVariable Long id,@RequestBody PipelineRequestDTO pipelineRequestDTO){
+    public ResponseEntity<PipelineResponseDTO> update(@PathVariable Long id,@RequestBody PipelineRequestDTO pipelineRequestDTO) {
         return ResponseEntity.ok(pipelineService.update(id, pipelineRequestDTO));
+
+    }
+    @PutMapping("/{pipelineID}/stages/{stageId}")
+    public ResponseEntity<StageResponseDTO> updateStage(@PathVariable Long pipelineID, @PathVariable Long stageId, @RequestBody StageRequestDTO stageRequestDTO){
+        return ResponseEntity.ok().body(stageService.updateStage(pipelineID,stageId,stageRequestDTO));
     }
 
     @DeleteMapping("/{id}")

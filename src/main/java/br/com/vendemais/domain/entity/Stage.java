@@ -1,9 +1,6 @@
 package br.com.vendemais.domain.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.Objects;
 
@@ -14,13 +11,21 @@ public class Stage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int number;
+    private String name;
+    private String code;
+    private Integer position;
+    private Boolean finalStage;
 
-    private String title;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pipeline_id")
+    private Pipeline pipeline;
 
-    public Stage(int number, String title) {
-        this.number = number;
-        this.title = title;
+    public Stage(String name, String code, Integer position, Boolean finalStage, Pipeline pipeline) {
+        this.name = name;
+        this.code = code;
+        this.position = position;
+        this.finalStage = finalStage;
+        this.pipeline = pipeline;
     }
 
     protected Stage() {}
@@ -29,20 +34,40 @@ public class Stage {
         return id;
     }
 
-    public int getNumber() {
-        return number;
+    public String getName() {
+        return name;
     }
 
-    public void setNumber(int number) {
-        this.number = number;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTitle() {
-        return title;
+    public String getCode() {
+        return code;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public Integer getPosition() {
+        return position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
+    }
+
+    public Boolean getFinalStage() {
+        return finalStage;
+    }
+
+    public void setFinalStage(Boolean finalStage) {
+        this.finalStage = finalStage;
+    }
+
+    public Pipeline getPipeline() {
+        return pipeline;
+    }
+
+    public void setPipeline(Pipeline pipeline) {
+        this.pipeline = pipeline;
     }
 
     @Override

@@ -17,7 +17,8 @@ public class Pipeline {
 
     private String title;
 
-    @OneToMany
+    @OneToMany(mappedBy = "pipeline", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position asc")
     private List<Stage> stages = new ArrayList<>();
 
     public Pipeline(String title) {
