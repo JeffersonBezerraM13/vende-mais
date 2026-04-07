@@ -36,7 +36,7 @@ public class UserService {
     }
 
     public UserResponseDTO create(UserRequestDTO userRequestDTO) {
-        if(findByEmail(userRequestDTO.email())){
+        if(existsByEmail(userRequestDTO.email())){
             throw new DataIntegrityViolationException("User já está cadastrado no sistema");
         }
 
@@ -66,7 +66,7 @@ public class UserService {
         return UserRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User não encontrado. ID:" +id));
     }
 
-    private boolean findByEmail(String email) {
+    private boolean existsByEmail(String email) {
         return UserRepository.existsByEmail(email);
     }
 }

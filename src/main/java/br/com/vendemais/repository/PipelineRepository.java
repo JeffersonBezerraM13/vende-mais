@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PipelineRepository extends JpaRepository<Pipeline, Long> {
 
+    boolean existsByTitle(String title);
 }

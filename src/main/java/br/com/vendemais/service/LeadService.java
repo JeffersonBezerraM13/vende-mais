@@ -34,7 +34,7 @@ public class LeadService {
     }
 
     public LeadResponseDTO create(LeadRequestDTO leadRequestDTO) {
-        if(findByEmail(leadRequestDTO.email())){
+        if(existsByEmail(leadRequestDTO.email())){
             throw new DataIntegrityViolationException("Lead já está cadastrado no sistema");
         }
 
@@ -81,7 +81,7 @@ public class LeadService {
         return leadRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Lead não encontrado. ID:" +id));
     }
 
-    private boolean findByEmail(String email) {
+    private boolean existsByEmail(String email) {
         return leadRepository.existsByEmail(email);
     }
 }
