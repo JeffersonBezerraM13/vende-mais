@@ -1,36 +1,30 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Compilação e Build
+/target/
+/bin/
+*.jar
+*.war
+*.zip
+*.tar.gz
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IDEs (Essencial ignorar para não poluir o repositório)
+.idea/
 *.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+.classpath
+.project
+.settings/
 .vscode/
+.factorypath
 
-## env ##
+# Logs e Arquivos Temporários
+*.log
+.DS_Store
+Thumbs.db
+temp/
+
+# Maven Wrapper
+.mvn/
+mvnw
+mvnw.cmd
+
+#.env
 .env
