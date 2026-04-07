@@ -3,6 +3,7 @@ package br.com.vendemais.controller;
 import br.com.vendemais.domain.dtos.lead.LeadRequestDTO;
 import br.com.vendemais.domain.dtos.lead.LeadResponseDTO;
 import br.com.vendemais.service.LeadService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -39,8 +40,8 @@ public class LeadController {
         return ResponseEntity.ok().body(leadResponseDTO);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<LeadResponseDTO> create(@RequestBody LeadRequestDTO leadRequestDTO){
+    @PostMapping
+    public ResponseEntity<LeadResponseDTO> create(@RequestBody @Valid LeadRequestDTO leadRequestDTO){
         LeadResponseDTO leadResponseDTO = leadService.create(leadRequestDTO);
 
         URI uri = ServletUriComponentsBuilder
@@ -54,7 +55,7 @@ public class LeadController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LeadResponseDTO> update(@PathVariable Long id,@RequestBody LeadRequestDTO leadRequestDTO){
+    public ResponseEntity<LeadResponseDTO> update(@PathVariable Long id,@RequestBody @Valid LeadRequestDTO leadRequestDTO){
         return ResponseEntity.ok(leadService.update(id, leadRequestDTO));
     }
 

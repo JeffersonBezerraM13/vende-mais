@@ -6,6 +6,7 @@ import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.repository.PipelineRepository;
 import br.com.vendemais.service.StageService;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -47,6 +47,14 @@ public class Pipeline {
         stages.remove(stage);
     }
 
+    public Stage getFistStage() {
+        return stages.getFirst();
+    }
+
+    public Stage getStage(int index){
+        return stages.get(index);
+    }
+
     public List<Stage> getStages() {
         return Collections.unmodifiableList(stages);
     }

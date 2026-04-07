@@ -3,6 +3,7 @@ package br.com.vendemais.controller;
 import br.com.vendemais.domain.dtos.user.UserRequestDTO;
 import br.com.vendemais.domain.dtos.user.UserResponseDTO;
 import br.com.vendemais.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -39,8 +40,8 @@ public class UserController {
         return ResponseEntity.ok().body(userResponseDTO);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<UserResponseDTO> create(@RequestBody UserRequestDTO userRequestDTO){
+    @PostMapping
+    public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserRequestDTO userRequestDTO){
         UserResponseDTO userResponseDTO = userService.create(userRequestDTO);
 
         URI uri = ServletUriComponentsBuilder
@@ -54,7 +55,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> update(@PathVariable Long id,@RequestBody UserRequestDTO userRequestDTO){
+    public ResponseEntity<UserResponseDTO> update(@PathVariable Long id,@RequestBody @Valid UserRequestDTO userRequestDTO){
         return ResponseEntity.ok(userService.update(id, userRequestDTO));
     }
 

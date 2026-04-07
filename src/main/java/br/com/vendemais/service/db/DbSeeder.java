@@ -98,7 +98,6 @@ public class DbSeeder {
         pipeline1op1.addStage(stg3);
         pipeline1op1.addStage(stg4);
         pipeline1op1.addStage(stg5);
-        pipelineRepository.saveAll(Arrays.asList(pipeline1op1));
 
         Opportunity op1lead1 = new Opportunity(
                 lead1,
@@ -106,6 +105,7 @@ public class DbSeeder {
                 Solution.SELF_STORAGE,
                 new BigDecimal("1000.00"),
                 pipeline1op1,
+                null,
                 LocalDate.now().plusDays(14),
                 "Nenhuma",
                 "Sem notas"

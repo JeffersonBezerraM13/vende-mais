@@ -15,7 +15,7 @@ public class Opportunity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "lead_id")
     private Lead lead;
 
@@ -26,8 +26,12 @@ public class Opportunity {
     @Column(precision = 19, scale = 2)
     private BigDecimal estimatedValue;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "pipeline_id")
     private Pipeline pipeline;
+
+    @ManyToOne
+    private Stage currentStage;
 
     private LocalDate expectedCloseDate;
 
@@ -39,12 +43,13 @@ public class Opportunity {
 
     private LocalDate updatedAt;
 
-    public Opportunity(Lead lead, String title, Solution definitiveSolution, BigDecimal estimatedValue, Pipeline pipeline, LocalDate expectedCloseDate, String lossReason, String notes) {
+    public Opportunity(Lead lead, String title, Solution definitiveSolution, BigDecimal estimatedValue, Pipeline pipeline, Stage currentStage, LocalDate expectedCloseDate, String lossReason, String notes) {
         this.lead = lead;
         this.title = title;
         this.definitiveSolution = definitiveSolution;
         this.estimatedValue = estimatedValue;
         this.pipeline = pipeline;
+        this.currentStage = currentStage;
         this.expectedCloseDate = expectedCloseDate;
         this.lossReason = lossReason;
         this.notes = notes;
@@ -96,6 +101,14 @@ public class Opportunity {
 
     public void setPipeline(Pipeline pipeline) {
         this.pipeline = pipeline;
+    }
+
+    public Stage getCurrentStage() {
+        return currentStage;
+    }
+
+    public void setCurrentStage(Stage currentStage) {
+        this.currentStage = currentStage;
     }
 
     public LocalDate getExpectedCloseDate() {

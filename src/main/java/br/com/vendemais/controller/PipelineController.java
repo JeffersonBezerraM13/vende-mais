@@ -6,6 +6,7 @@ import br.com.vendemais.domain.dtos.stage.StageRequestDTO;
 import br.com.vendemais.domain.dtos.stage.StageResponseDTO;
 import br.com.vendemais.service.PipelineService;
 import br.com.vendemais.service.StageService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -46,7 +47,7 @@ public class PipelineController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<PipelineResponseDTO> create(@RequestBody PipelineRequestDTO pipelineRequestDTO){
+    public ResponseEntity<PipelineResponseDTO> create(@RequestBody @Valid PipelineRequestDTO pipelineRequestDTO){
         PipelineResponseDTO pipelineResponseDTO = pipelineService.create(pipelineRequestDTO);
 
         URI uri = ServletUriComponentsBuilder
@@ -59,18 +60,18 @@ public class PipelineController {
         return ResponseEntity.created(uri).body(pipelineResponseDTO);
     }
 
-    @PostMapping("/{pipelineId}/stages/create")
-    public ResponseEntity<StageResponseDTO> createStage(@PathVariable Long pipelineId , @RequestBody StageRequestDTO stageRequestDTO){
+    @PostMapping("/{pipelineId}/stages")
+    public ResponseEntity<StageResponseDTO> createStage(@PathVariable Long pipelineId , @RequestBody @Valid StageRequestDTO stageRequestDTO){
         return ResponseEntity.ok().body(stageService.createStage(pipelineId,stageRequestDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PipelineResponseDTO> update(@PathVariable Long id,@RequestBody PipelineRequestDTO pipelineRequestDTO) {
+    public ResponseEntity<PipelineResponseDTO> update(@PathVariable Long id,@RequestBody @Valid PipelineRequestDTO pipelineRequestDTO) {
         return ResponseEntity.ok(pipelineService.update(id, pipelineRequestDTO));
 
     }
     @PutMapping("/{pipelineID}/stages/{stageId}")
-    public ResponseEntity<StageResponseDTO> updateStage(@PathVariable Long pipelineID, @PathVariable Long stageId, @RequestBody StageRequestDTO stageRequestDTO){
+    public ResponseEntity<StageResponseDTO> updateStage(@PathVariable Long pipelineID, @PathVariable Long stageId, @RequestBody @Valid StageRequestDTO stageRequestDTO){
         return ResponseEntity.ok().body(stageService.updateStage(pipelineID,stageId,stageRequestDTO));
     }
 
