@@ -1,14 +1,14 @@
 package br.com.vendemais.domain.dtos.task;
 
 import br.com.vendemais.domain.entity.Task;
-import br.com.vendemais.domain.enums.Status;
+import br.com.vendemais.domain.enums.TaskStatus;
 import java.time.LocalDate;
 
 public record TaskResponseDTO(
         Long id,
         String title,
         String description,
-        Status status,
+        TaskStatus taskStatus,
         LocalDate dueDate,
         Long leadId,
         Long opportunityId,

@@ -1,9 +1,9 @@
 package br.com.vendemais.domain.entity;
 
-import br.com.vendemais.domain.enums.LeadStatus;
-import br.com.vendemais.domain.enums.Status;
+import br.com.vendemais.domain.enums.TaskStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -20,9 +20,9 @@ public class Task {
 
     private String description;
 
-    private Status status;
+    private TaskStatus taskStatus;
 
-    @NotBlank(message = "Data de vencimento não pode ser vazia")
+    @NotNull(message = "Data de vencimento não pode ser vazia")
     private LocalDate dueDate;
 
     @ManyToOne
@@ -37,10 +37,10 @@ public class Task {
 
     private LocalDate updatedAt;
 
-    public Task(String title, String description, Status status, LocalDate dueDate, Lead lead, Opportunity opportunity) {
+    public Task(String title, String description, TaskStatus taskStatus, LocalDate dueDate, Lead lead, Opportunity opportunity) {
         this.title = title;
         this.description = description;
-        this.status = status;
+        this.taskStatus = taskStatus;
         this.dueDate = dueDate;
         this.lead = lead;
         this.opportunity = opportunity;
@@ -69,12 +69,12 @@ public class Task {
         this.description = description;
     }
 
-    public Status getStatus() {
-        return status;
+    public TaskStatus getStatus() {
+        return taskStatus;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setStatus(TaskStatus taskStatus) {
+        this.taskStatus = taskStatus;
     }
 
     public LocalDate getDueDate() {

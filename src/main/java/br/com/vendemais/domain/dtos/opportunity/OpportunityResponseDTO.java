@@ -1,15 +1,17 @@
 package br.com.vendemais.domain.dtos.opportunity;
 
 import br.com.vendemais.domain.entity.Opportunity;
-import br.com.vendemais.domain.enums.InterestSolution;
+import br.com.vendemais.domain.enums.Solution;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record OpportunityResponseDTO(
         Long id,
         Long leadId,
         String title,
-        InterestSolution definitiveSolution,
-        Float estimatedValue,
+        Solution definitiveSolution,
+        BigDecimal estimatedValue,
         Long pipelineId,
         LocalDate expectedCloseDate,
         String lossReason,

@@ -1,9 +1,10 @@
 package br.com.vendemais.domain.entity;
 
-import br.com.vendemais.domain.enums.InterestSolution;
+import br.com.vendemais.domain.enums.Solution;
 import jakarta.persistence.*;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -20,9 +21,10 @@ public class Opportunity {
 
     private String title;
 
-    private InterestSolution definitiveSolution ;
+    private Solution definitiveSolution ;
 
-    private Float estimatedValue;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal estimatedValue;
 
     @OneToOne
     private Pipeline pipeline;
@@ -37,7 +39,7 @@ public class Opportunity {
 
     private LocalDate updatedAt;
 
-    public Opportunity(Lead lead, String title, InterestSolution definitiveSolution, Float estimatedValue, Pipeline pipeline, LocalDate expectedCloseDate, String lossReason, String notes) {
+    public Opportunity(Lead lead, String title, Solution definitiveSolution, BigDecimal estimatedValue, Pipeline pipeline, LocalDate expectedCloseDate, String lossReason, String notes) {
         this.lead = lead;
         this.title = title;
         this.definitiveSolution = definitiveSolution;
@@ -72,19 +74,19 @@ public class Opportunity {
         this.title = title;
     }
 
-    public InterestSolution getDefinitiveSolution() {
+    public Solution getDefinitiveSolution() {
         return definitiveSolution;
     }
 
-    public void setDefinitiveSolution(InterestSolution definitiveSolution) {
+    public void setDefinitiveSolution(Solution definitiveSolution) {
         this.definitiveSolution = definitiveSolution;
     }
 
-    public Float getEstimatedValue() {
+    public BigDecimal getEstimatedValue() {
         return estimatedValue;
     }
 
-    public void setEstimatedValue(Float estimatedValue) {
+    public void setEstimatedValue(BigDecimal estimatedValue) {
         this.estimatedValue = estimatedValue;
     }
 
