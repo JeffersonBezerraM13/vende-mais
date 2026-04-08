@@ -70,10 +70,6 @@ public class OpportunityService {
         Lead lead = leadRepository.findById(dto.leadId())
                 .orElseThrow(() -> new DataIntegrityViolationException("Lead não existente"));
 
-        if (lead.getLeadStatus() == LeadStatus.DISQUALIFIED) {
-            throw new DataIntegrityViolationException("Esse lead está desqualificado");
-        }
-
         Pipeline pipeline = pipelineRepository.findById(dto.pipelineId())
                 .orElseThrow(() -> new DataIntegrityViolationException("Funil não existe"));
 
@@ -93,7 +89,6 @@ public class OpportunityService {
                 dto.notes()
         );
 
-        lead.setLeadStatus(LeadStatus.CONVERTED);
         leadRepository.save(lead);
 
         return OpportunityResponseDTO.daEntidade(opportunityRepository.save(opportunity));

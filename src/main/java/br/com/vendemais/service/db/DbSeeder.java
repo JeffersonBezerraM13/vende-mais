@@ -47,7 +47,6 @@ public class DbSeeder {
                 Solution.SELF_STORAGE,
                 LeadSource.WHATSAPP,
                 EntryMethod.MANUAL,
-                LeadStatus.NEW,
                 "Sem observação"
         );
 
@@ -60,7 +59,6 @@ public class DbSeeder {
                 Solution.COWORKING,
                 LeadSource.PHONE_CALL,
                 EntryMethod.MANUAL,
-                LeadStatus.NEW,
                 "Sem observação"
         );
 
@@ -110,7 +108,6 @@ public class DbSeeder {
                 "Nenhuma",
                 "Sem notas"
         );
-        lead1.setLeadStatus(LeadStatus.CONVERTED);
 
         leadRepository.save(lead1);
         opportunityRepository.save(op1lead1);

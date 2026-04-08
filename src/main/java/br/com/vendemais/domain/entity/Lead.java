@@ -42,19 +42,13 @@ public class Lead {
     @NotNull (message = "Forma de registro do lead não pode ser vazia")
     private EntryMethod entryMethod;
 
-
-    //remover
-    //lead com LeadStatus 'desqualified' não pode ser convertido em oportunidade
-    //lead convertido continua existindo, mas deve ficar marcado como convertido
-    private LeadStatus leadStatus;
-
     private String notes;
 
     private LocalDate createdAt;
 
     private LocalDate updatedAt;
 
-    public Lead(String name, String phone, String email, PersonType personType, String companyName, Solution interestSolution, LeadSource leadSource, EntryMethod entryMethod, LeadStatus leadStatus, String notes) {
+    public Lead(String name, String phone, String email, PersonType personType, String companyName, Solution interestSolution, LeadSource leadSource, EntryMethod entryMethod, String notes) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -63,7 +57,6 @@ public class Lead {
         this.interestSolution = interestSolution;
         this.leadSource = leadSource;
         this.entryMethod = entryMethod;
-        this.leadStatus = leadStatus;
         this.notes = notes;
         this.createdAt = LocalDate.now();
     }
@@ -142,14 +135,6 @@ public class Lead {
 
     public void setEntryMethod(EntryMethod entryMethod) {
         this.entryMethod = entryMethod;
-    }
-
-    public LeadStatus getLeadStatus() {
-        return leadStatus;
-    }
-
-    public void setLeadStatus(LeadStatus leadStatus) {
-        this.leadStatus = leadStatus;
     }
 
     public String getNotes() {

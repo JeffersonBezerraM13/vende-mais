@@ -1,7 +1,6 @@
 package br.com.vendemais.security;
 
 
-import br.com.vendemais.domain.dtos.CredentialsDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

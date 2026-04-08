@@ -47,7 +47,6 @@ public class LeadService {
                 leadRequestDTO.interestSoluction(),
                 leadRequestDTO.leadSource(),
                 leadRequestDTO.entryMethod(),
-                leadRequestDTO.leadStatus(),
                 leadRequestDTO.notes()
         );
 
@@ -65,7 +64,6 @@ public class LeadService {
         lead.setInterestSoluction(leadRequestDTO.interestSoluction());
         lead.setLeadSource(leadRequestDTO.leadSource());
         lead.setEntryMethod(leadRequestDTO.entryMethod());
-        lead.setLeadStatus(leadRequestDTO.leadStatus());
         lead.setNotes(leadRequestDTO.notes());
         lead.setUpdatedAt(LocalDate.now());
 

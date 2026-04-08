@@ -14,7 +14,6 @@ public record LeadResponseDTO(
         Solution interestSoluction,
         LeadSource leadSource,
         EntryMethod entryMethod,
-        LeadStatus leadStatus,
         String notes,
         LocalDate createdAt,
         LocalDate updatedAt
@@ -30,7 +29,6 @@ public record LeadResponseDTO(
                 entidade.getInterestSolution(),
                 entidade.getLeadSource(),
                 entidade.getEntryMethod(),
-                entidade.getLeadStatus(),
                 entidade.getNotes(),
                 entidade.getCreatedAt(),
                 entidade.getUpdatedAt()

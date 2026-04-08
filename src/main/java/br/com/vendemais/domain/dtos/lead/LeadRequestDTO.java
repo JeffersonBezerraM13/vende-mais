@@ -23,8 +23,6 @@ public record LeadRequestDTO(
         @NotNull(message = "Origem do lead não pode ser vazia")
         LeadSource leadSource,
 
-        LeadStatus leadStatus,
-
         @NotNull(message = "Forma de registro do lead não pode ser vazia")
         EntryMethod entryMethod,
 
