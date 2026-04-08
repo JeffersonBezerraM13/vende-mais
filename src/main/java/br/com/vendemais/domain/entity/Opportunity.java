@@ -1,5 +1,6 @@
 package br.com.vendemais.domain.entity;
 
+import br.com.vendemais.domain.enums.OpportunityStatus;
 import br.com.vendemais.domain.enums.Solution;
 import jakarta.persistence.*;
 
@@ -35,6 +36,9 @@ public class Opportunity {
 
     private LocalDate expectedCloseDate;
 
+    @Enumerated(EnumType.STRING)
+    private OpportunityStatus status;
+
     private String lossReason;
 
     private String notes;
@@ -43,7 +47,7 @@ public class Opportunity {
 
     private LocalDate updatedAt;
 
-    public Opportunity(Lead lead, String title, Solution definitiveSolution, BigDecimal estimatedValue, Pipeline pipeline, Stage currentStage, LocalDate expectedCloseDate, String lossReason, String notes) {
+    public Opportunity(Lead lead, String title, Solution definitiveSolution, BigDecimal estimatedValue, Pipeline pipeline, Stage currentStage, LocalDate expectedCloseDate, OpportunityStatus status,String lossReason, String notes) {
         this.lead = lead;
         this.title = title;
         this.definitiveSolution = definitiveSolution;
@@ -51,6 +55,7 @@ public class Opportunity {
         this.pipeline = pipeline;
         this.currentStage = currentStage;
         this.expectedCloseDate = expectedCloseDate;
+        this.status = status;
         this.lossReason = lossReason;
         this.notes = notes;
         this.createdAt = LocalDate.now();
@@ -117,6 +122,14 @@ public class Opportunity {
 
     public void setExpectedCloseDate(LocalDate expectedCloseDate) {
         this.expectedCloseDate = expectedCloseDate;
+    }
+
+    public OpportunityStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OpportunityStatus status) {
+        this.status = status;
     }
 
     public String getLossReason() {

@@ -53,7 +53,11 @@ public class PipelineService {
 
     public void delete(Long id){
         Pipeline pipeline = findPipelineById(id);
-        pipelineRepository.delete(pipeline);
+        try{
+            pipelineRepository.delete(pipeline);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new DataIntegrityViolationException("Você não pode apagar este funil pois ele está sendo utilizado em etapas ou oportunidades.");
+        }
     }
 
     private Pipeline findPipelineById(Long id) {

@@ -1,5 +1,6 @@
 package br.com.vendemais.domain.dtos.opportunity;
 
+import br.com.vendemais.domain.enums.OpportunityStatus;
 import br.com.vendemais.domain.enums.Solution;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,8 @@ public record OpportunityRequestDTO(
         Long currentStageId,
 
         LocalDate expectedCloseDate,
+
+        OpportunityStatus status,
 
         String lossReason,
 

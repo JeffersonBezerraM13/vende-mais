@@ -46,7 +46,7 @@ public class PipelineController {
         return ResponseEntity.ok().body(pipelineResponseDTO);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<PipelineResponseDTO> create(@RequestBody @Valid PipelineRequestDTO pipelineRequestDTO){
         PipelineResponseDTO pipelineResponseDTO = pipelineService.create(pipelineRequestDTO);
 

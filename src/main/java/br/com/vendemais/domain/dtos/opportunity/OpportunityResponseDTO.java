@@ -1,6 +1,7 @@
 package br.com.vendemais.domain.dtos.opportunity;
 
 import br.com.vendemais.domain.entity.Opportunity;
+import br.com.vendemais.domain.enums.OpportunityStatus;
 import br.com.vendemais.domain.enums.Solution;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ public record OpportunityResponseDTO(
         Long pipelineId,
         Long currentStageId,
         LocalDate expectedCloseDate,
+        OpportunityStatus status,
         String lossReason,
         String notes,
         LocalDate createdAt,
@@ -30,6 +32,7 @@ public record OpportunityResponseDTO(
                 entidade.getPipeline() != null ? entidade.getPipeline().getId() : null,
                 entidade.getCurrentStage() != null ? entidade.getCurrentStage().getId() : null,
                 entidade.getExpectedCloseDate(),
+                entidade.getStatus(),
                 entidade.getLossReason(),
                 entidade.getNotes(),
                 entidade.getCreatedAt(),

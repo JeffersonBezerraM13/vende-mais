@@ -7,6 +7,7 @@ import br.com.vendemais.domain.entity.Lead;
 import br.com.vendemais.domain.entity.Opportunity;
 import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.domain.entity.Stage;
+import br.com.vendemais.domain.enums.OpportunityStatus;
 import br.com.vendemais.repository.LeadRepository;
 import br.com.vendemais.repository.OpportunityRepository;
 import br.com.vendemais.repository.PipelineRepository;
@@ -50,9 +51,7 @@ public class OpportunityService {
         if (leadId == null) {
             throw new IllegalArgumentException("O ID do Lead não pode ser nulo.");
         }
-
-        // Retorna true se achar pelo menos uma negociação em andamento
-        return opportunityRepository.existsByLeadIdAndCurrentStage_FinalStageFalse(leadId);
+        return opportunityRepository.existsByLeadIdAndStatus(leadId, OpportunityStatus.OPEN);
     }
 
     public OpportunityResponseDTO create(OpportunityRequestDTO opportunityRequestDTO) {
@@ -74,6 +73,7 @@ public class OpportunityService {
                 pipeline,
                 null,
                 opportunityRequestDTO.expectedCloseDate(),
+                opportunityRequestDTO.status(),
                 opportunityRequestDTO.lossReason(),
                 opportunityRequestDTO.notes()
         );
@@ -100,6 +100,7 @@ public class OpportunityService {
         opportunity.setEstimatedValue(opportunityRequestDTO.estimatedValue());
         opportunity.setPipeline(pipeline);
         opportunity.setExpectedCloseDate(opportunityRequestDTO.expectedCloseDate());
+        opportunity.setStatus(opportunityRequestDTO.status());
         opportunity.setLossReason(opportunityRequestDTO.lossReason());
         opportunity.setNotes(opportunityRequestDTO.notes());
         opportunity.setUpdatedAt(LocalDate.now());

@@ -107,6 +107,7 @@ public class DbSeeder {
                 pipeline1op1,
                 null,
                 LocalDate.now().plusDays(14),
+                OpportunityStatus.OPEN,
                 "Nenhuma",
                 "Sem notas"
         );
