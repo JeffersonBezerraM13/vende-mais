@@ -4,7 +4,6 @@ import br.com.vendemais.domain.dtos.pipeline.PipelineRequestDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
 import br.com.vendemais.domain.dtos.stage.StageRequestDTO;
 import br.com.vendemais.domain.dtos.stage.StageResponseDTO;
-import br.com.vendemais.domain.enums.StageType;
 import br.com.vendemais.service.PipelineService;
 import br.com.vendemais.service.StageService;
 import br.com.vendemais.support.MockMvcSecurityConfig;
@@ -79,12 +78,12 @@ class PipelineControllerHttpTest {
 
     @Test
     void createStageReturnsOkForAdmin() throws Exception {
-        StageRequestDTO request = new StageRequestDTO("Qualified", "QUALIFIED", 2,1L);
+        StageRequestDTO request = new StageRequestDTO("Qualified", "QUALIFIED", 2, 3L);
         StageResponseDTO response = new StageResponseDTO(9L, "Qualified", "QUALIFIED", 2, 3L);
 
-        when(stageService.createStage(eq(3L), eq(request))).thenReturn(response);
+        when(stageService.createStage(eq(request))).thenReturn(response);
 
-        mockMvc.perform(post("/pipelines/3/stages")
+        mockMvc.perform(post("/pipelines/stages")
                         .with(TestAuthentications.admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -95,9 +94,9 @@ class PipelineControllerHttpTest {
 
     @Test
     void createStageReturnsForbiddenForNonAdmin() throws Exception {
-        StageRequestDTO request = new StageRequestDTO("Qualified", "QUALIFIED", 2, StageType.OPEN);
+        StageRequestDTO request = new StageRequestDTO("Qualified", "QUALIFIED", 2, 3L);
 
-        mockMvc.perform(post("/pipelines/3/stages")
+        mockMvc.perform(post("/pipelines/stages")
                         .with(TestAuthentications.user())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -136,12 +135,12 @@ class PipelineControllerHttpTest {
 
     @Test
     void updateStageReturnsOkForAdmin() throws Exception {
-        StageRequestDTO request = new StageRequestDTO("Proposal", "PROPOSAL", 4, StageType.OPEN);
-        StageResponseDTO response = new StageResponseDTO(11L, "Proposal", "PROPOSAL", 4, StageType.OPEN, 3L);
+        StageRequestDTO request = new StageRequestDTO("Proposal", "PROPOSAL", 4, 3L);
+        StageResponseDTO response = new StageResponseDTO(11L, "Proposal", "PROPOSAL", 4, 3L);
 
-        when(stageService.updateStage(eq(3L), eq(11L), eq(request))).thenReturn(response);
+        when(stageService.updateStage(eq(11L), eq(request))).thenReturn(response);
 
-        mockMvc.perform(put("/pipelines/3/stages/11")
+        mockMvc.perform(put("/pipelines/stages/11")
                         .with(TestAuthentications.admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -152,9 +151,9 @@ class PipelineControllerHttpTest {
 
     @Test
     void updateStageReturnsForbiddenForNonAdmin() throws Exception {
-        StageRequestDTO request = new StageRequestDTO("Proposal", "PROPOSAL", 4, StageType.OPEN);
+        StageRequestDTO request = new StageRequestDTO("Proposal", "PROPOSAL", 4, 3L);
 
-        mockMvc.perform(put("/pipelines/3/stages/11")
+        mockMvc.perform(put("/pipelines/stages/11")
                         .with(TestAuthentications.user())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
