@@ -1,5 +1,6 @@
 package br.com.vendemais.domain.dtos.stage;
 
+import br.com.vendemais.domain.enums.StageType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -13,6 +14,6 @@ public record StageRequestDTO(
         @NotNull(message = "A posição do estágio é obrigatória")
         Integer position,
 
-        @NotNull(message = "A indicação de estágio final (true/false) é obrigatória")
-        Boolean finalStage
+        @NotNull(message = "Tipo do estágio é obrigatório")
+        StageType type
 ) {}

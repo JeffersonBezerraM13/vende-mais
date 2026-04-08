@@ -1,6 +1,6 @@
 package br.com.vendemais.domain.enums;
 
-public enum OpportunityStatus {
+public enum StageType {
     OPEN,
     WON,
     LOST

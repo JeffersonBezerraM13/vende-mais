@@ -1,7 +1,7 @@
 package br.com.vendemais.domain.dtos.opportunity;
 
 import br.com.vendemais.domain.entity.Opportunity;
-import br.com.vendemais.domain.enums.OpportunityStatus;
+import br.com.vendemais.domain.enums.StageType;
 import br.com.vendemais.domain.enums.Solution;
 
 import java.math.BigDecimal;
@@ -15,28 +15,30 @@ public record OpportunityResponseDTO(
         BigDecimal estimatedValue,
         Long pipelineId,
         Long currentStageId,
+        String currentStageName,
+        StageType currentStageType,
         LocalDate expectedCloseDate,
-        OpportunityStatus status,
         String lossReason,
         String notes,
         LocalDate createdAt,
         LocalDate updatedAt
 ) {
-    public static OpportunityResponseDTO daEntidade(Opportunity entidade) {
+    public static OpportunityResponseDTO daEntidade(Opportunity entity) {
         return new OpportunityResponseDTO(
-                entidade.getId(),
-                entidade.getLead() != null ? entidade.getLead().getId() : null,
-                entidade.getTitle(),
-                entidade.getDefinitiveSolution(),
-                entidade.getEstimatedValue(),
-                entidade.getPipeline() != null ? entidade.getPipeline().getId() : null,
-                entidade.getCurrentStage() != null ? entidade.getCurrentStage().getId() : null,
-                entidade.getExpectedCloseDate(),
-                entidade.getStatus(),
-                entidade.getLossReason(),
-                entidade.getNotes(),
-                entidade.getCreatedAt(),
-                entidade.getUpdatedAt()
+                entity.getId(),
+                entity.getLead() != null ? entity.getLead().getId() : null,
+                entity.getTitle(),
+                entity.getDefinitiveSolution(),
+                entity.getEstimatedValue(),
+                entity.getPipeline() != null ? entity.getPipeline().getId() : null,
+                entity.getCurrentStage() != null ? entity.getCurrentStage().getId() : null,
+                entity.getCurrentStage() != null ? entity.getCurrentStage().getName() : null,
+                entity.getCurrentStage() != null ? entity.getCurrentStage().getType() : null,
+                entity.getExpectedCloseDate(),
+                entity.getLossReason(),
+                entity.getNotes(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
         );
     }
 }

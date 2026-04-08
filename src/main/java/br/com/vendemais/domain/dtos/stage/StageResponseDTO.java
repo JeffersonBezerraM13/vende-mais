@@ -1,13 +1,14 @@
 package br.com.vendemais.domain.dtos.stage;
 
 import br.com.vendemais.domain.entity.Stage;
+import br.com.vendemais.domain.enums.StageType;
 
 public record StageResponseDTO(
         Long id,
         String name,
         String code,
         Integer position,
-        Boolean finalStage,
+        StageType type,
         Long pipelineId
 ) {
     public static StageResponseDTO daEntidade(Stage entidade) {
@@ -16,7 +17,7 @@ public record StageResponseDTO(
                 entidade.getName(),
                 entidade.getCode(),
                 entidade.getPosition(),
-                entidade.getFinalStage(),
+                entidade.getType(),
                 entidade.getPipeline() != null ? entidade.getPipeline().getId() : null
         );
     }

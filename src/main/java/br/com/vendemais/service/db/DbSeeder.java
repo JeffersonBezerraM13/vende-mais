@@ -86,11 +86,11 @@ public class DbSeeder {
 
         pipelineRepository.save(pipeline1op1);
 
-        Stage stg1 = new Stage("Novo lead", "NOVO_LEAD", 1, false, pipeline1op1);
-        Stage stg2 = new Stage("Contato inicial", "CONTATO_INICIAL", 2, false, pipeline1op1);
-        Stage stg3 = new Stage("Qualificação", "QUALIFICACAO", 3, false, pipeline1op1);
-        Stage stg4 = new Stage("Proposta enviada", "PROPOSTA_ENVIADA", 4, false, pipeline1op1);
-        Stage stg5 = new Stage("Ganho", "GANHO", 5, true, pipeline1op1);
+        Stage stg1 = new Stage("Novo lead", "NOVO_LEAD", 1, StageType.OPEN, pipeline1op1);
+        Stage stg2 = new Stage("Contato inicial", "CONTATO_INICIAL", 2, StageType.OPEN, pipeline1op1);
+        Stage stg3 = new Stage("Qualificação", "QUALIFICACAO", 3, StageType.OPEN, pipeline1op1);
+        Stage stg4 = new Stage("Proposta enviada", "PROPOSTA_ENVIADA", 4, StageType.OPEN, pipeline1op1);
+        Stage stg5 = new Stage("Ganho", "GANHO", 5, StageType.OPEN, pipeline1op1);
 
         stageRepository.saveAll(Arrays.asList(stg1,stg2,stg3,stg4,stg5));
         pipeline1op1.addStage(stg1);
@@ -107,7 +107,6 @@ public class DbSeeder {
                 pipeline1op1,
                 null,
                 LocalDate.now().plusDays(14),
-                OpportunityStatus.OPEN,
                 "Nenhuma",
                 "Sem notas"
         );

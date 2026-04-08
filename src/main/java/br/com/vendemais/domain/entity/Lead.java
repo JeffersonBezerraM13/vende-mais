@@ -42,6 +42,8 @@ public class Lead {
     @NotNull (message = "Forma de registro do lead não pode ser vazia")
     private EntryMethod entryMethod;
 
+
+    //remover
     //lead com LeadStatus 'desqualified' não pode ser convertido em oportunidade
     //lead convertido continua existindo, mas deve ficar marcado como convertido
     private LeadStatus leadStatus;

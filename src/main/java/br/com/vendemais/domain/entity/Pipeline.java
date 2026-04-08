@@ -2,10 +2,7 @@ package br.com.vendemais.domain.entity;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 @Entity
@@ -47,8 +44,14 @@ public class Pipeline {
         stages.remove(stage);
     }
 
-    public Stage getFistStage() {
-        return stages.getFirst();
+    public Stage getFirstStage() {
+        if (stages == null || stages.isEmpty()) {
+            return null;
+        }
+
+        return stages.stream()
+                .min(Comparator.comparing(Stage::getPosition))
+                .orElse(null);
     }
 
     public Stage getStage(int index){

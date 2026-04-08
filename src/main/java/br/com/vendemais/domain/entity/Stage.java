@@ -1,6 +1,8 @@
 package br.com.vendemais.domain.entity;
 
+import br.com.vendemais.domain.enums.StageType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
 
@@ -12,19 +14,24 @@ public class Stage {
     private Long id;
 
     private String name;
+    @Column(unique = true)
     private String code;
+    @Column(unique = true)
     private Integer position;
-    private Boolean finalStage;
+
+    //tirar essa informação
+    @Enumerated(EnumType.STRING)
+    private StageType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pipeline_id")
     private Pipeline pipeline;
 
-    public Stage(String name, String code, Integer position, Boolean finalStage, Pipeline pipeline) {
+    public Stage(String name, String code, Integer position, StageType type, Pipeline pipeline) {
         this.name = name;
         this.code = code;
         this.position = position;
-        this.finalStage = finalStage;
+        this.type = type;
         this.pipeline = pipeline;
     }
 
@@ -54,12 +61,24 @@ public class Stage {
         this.position = position;
     }
 
-    public Boolean getFinalStage() {
-        return finalStage;
+    public StageType getType() {
+        return type;
     }
 
-    public void setFinalStage(Boolean finalStage) {
-        this.finalStage = finalStage;
+    public void setType(StageType type) {
+        this.type = type;
+    }
+
+    public boolean isOpen() {
+        return this.type == StageType.OPEN;
+    }
+
+    public boolean isWon() {
+        return this.type == StageType.WON;
+    }
+
+    public boolean isLost() {
+        return this.type == StageType.LOST;
     }
 
     public Pipeline getPipeline() {
