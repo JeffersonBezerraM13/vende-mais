@@ -69,14 +69,14 @@ public class DbSeeder {
         User userAdmin = new User(
                 "Albert Einstein",
                 "einstein@gmail.com",
-                encoder.encode("1234")
+                encoder.encode("123456")
         );
         userAdmin.addRole(Role.ADMIN);
 
         User user1 = new User(
                 "Nikola Tesla",
                 "tesla@gmail.com",
-                encoder.encode("1234")
+                encoder.encode("123456")
         );
         user1.addRole(Role.USER);
 

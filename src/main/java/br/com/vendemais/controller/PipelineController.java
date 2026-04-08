@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -46,6 +47,7 @@ public class PipelineController {
         return ResponseEntity.ok().body(pipelineResponseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<PipelineResponseDTO> create(@RequestBody @Valid PipelineRequestDTO pipelineRequestDTO){
         PipelineResponseDTO pipelineResponseDTO = pipelineService.create(pipelineRequestDTO);
@@ -60,21 +62,26 @@ public class PipelineController {
         return ResponseEntity.created(uri).body(pipelineResponseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{pipelineId}/stages")
     public ResponseEntity<StageResponseDTO> createStage(@PathVariable Long pipelineId , @RequestBody @Valid StageRequestDTO stageRequestDTO){
         return ResponseEntity.ok().body(stageService.createStage(pipelineId,stageRequestDTO));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<PipelineResponseDTO> update(@PathVariable Long id,@RequestBody @Valid PipelineRequestDTO pipelineRequestDTO) {
         return ResponseEntity.ok(pipelineService.update(id, pipelineRequestDTO));
 
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{pipelineID}/stages/{stageId}")
     public ResponseEntity<StageResponseDTO> updateStage(@PathVariable Long pipelineID, @PathVariable Long stageId, @RequestBody @Valid StageRequestDTO stageRequestDTO){
         return ResponseEntity.ok().body(stageService.updateStage(pipelineID,stageId,stageRequestDTO));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         pipelineService.delete(id);

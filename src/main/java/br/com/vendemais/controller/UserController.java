@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -40,6 +41,7 @@ public class UserController {
         return ResponseEntity.ok().body(userResponseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserRequestDTO userRequestDTO){
         UserResponseDTO userResponseDTO = userService.create(userRequestDTO);
@@ -54,11 +56,13 @@ public class UserController {
         return ResponseEntity.created(uri).body(userResponseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> update(@PathVariable Long id,@RequestBody @Valid UserRequestDTO userRequestDTO){
         return ResponseEntity.ok(userService.update(id, userRequestDTO));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         userService.delete(id);

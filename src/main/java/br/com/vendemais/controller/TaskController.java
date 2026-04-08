@@ -25,6 +25,7 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+
     @GetMapping
     public ResponseEntity<Page<TaskResponseDTO>> findAll(
             // Se o front-end não mandar nada, por padrão:

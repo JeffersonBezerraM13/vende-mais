@@ -6,6 +6,7 @@ import br.com.vendemais.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -29,12 +30,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_MATCHES = {
-            "/h2-console/**",
-            "/v3/api-docs/**",
-            "/swagger-ui.html",
-            "/swagger-ui/**",
-            "/gerar-sql",
-            "/**"
+            "/h2-console/**"
     };
 
     @Autowired
@@ -47,11 +43,31 @@ public class SecurityConfig {
     private UserDetailsService userDetailsService;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           AuthenticationManager authenticationManager) throws Exception {
+    @Profile("test")
+    public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
 
         // Liberando acesso ao H2-console em perfil test
         if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
+            http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+        }
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configure(http)) // Mantém o CORS ligado para o seu Frontend local funcionar!
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // Libera todas as rotas
+
+        System.out.println("ATENÇÃO: Segurança desligada para ambiente de testes!");
+
+        return http.build();
+    }
+
+    @Bean
+    @Profile("prod")
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           AuthenticationManager authenticationManager) throws Exception {
+
+        // Liberando acesso ao H2-console em perfil prod
+        if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
             http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
         }
 
@@ -81,7 +97,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();
         configuration.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowCredentials(true); // importante se for usar cookies
+        configuration.setAllowCredentials(false); // importante se for usar cookies
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
