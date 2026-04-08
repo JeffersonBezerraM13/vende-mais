@@ -26,20 +26,14 @@ public class Opportunity {
     @Column(precision = 19, scale = 2)
     private BigDecimal estimatedValue;
 
-    //remover
-    @ManyToOne
-    @JoinColumn(name = "pipeline_id")
-    private Pipeline pipeline;
-
     @ManyToOne
     private Stage currentStage;
 
-    //private boolean win;
+    private boolean won;
 
     private LocalDate expectedCloseDate;
 
-    //Se null então tá aberto, se não tá fechado
-    //private LocalDate closeDate;
+    private LocalDate closedAt;
 
     private String lossReason;
 
@@ -49,15 +43,14 @@ public class Opportunity {
 
     private LocalDate updatedAt;
 
-    public Opportunity(Lead lead, String title, Solution definitiveSolution, BigDecimal estimatedValue, Pipeline pipeline, Stage currentStage, LocalDate expectedCloseDate, String lossReason, String notes) {
+    public Opportunity(Lead lead, String title, Solution definitiveSolution, BigDecimal estimatedValue, Stage currentStage, LocalDate expectedCloseDate, String notes) {
         this.lead = lead;
         this.title = title;
         this.definitiveSolution = definitiveSolution;
         this.estimatedValue = estimatedValue;
-        this.pipeline = pipeline;
         this.currentStage = currentStage;
+        this.won = false;
         this.expectedCloseDate = expectedCloseDate;
-        this.lossReason = lossReason;
         this.notes = notes;
         this.createdAt = LocalDate.now();
     }
@@ -101,12 +94,12 @@ public class Opportunity {
         this.estimatedValue = estimatedValue;
     }
 
-    public Pipeline getPipeline() {
-        return pipeline;
+    public boolean isWon(){
+        return this.won;
     }
 
-    public void setPipeline(Pipeline pipeline) {
-        this.pipeline = pipeline;
+    public void setWon(boolean won) {
+        this.won = won;
     }
 
     public Stage getCurrentStage() {
@@ -123,6 +116,14 @@ public class Opportunity {
 
     public void setExpectedCloseDate(LocalDate expectedCloseDate) {
         this.expectedCloseDate = expectedCloseDate;
+    }
+
+    public LocalDate getClosedAt() {
+        return closedAt;
+    }
+
+    public void setClosedAt(LocalDate closedAt) {
+        this.closedAt = closedAt;
     }
 
     public String getLossReason() {

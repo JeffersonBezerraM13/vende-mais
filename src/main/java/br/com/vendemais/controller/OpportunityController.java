@@ -1,5 +1,6 @@
 package br.com.vendemais.controller;
 
+import br.com.vendemais.domain.dtos.opportunity.OpportunityCloseDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityRequestDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityResponseDTO;
 import br.com.vendemais.service.OpportunityService;
@@ -48,8 +49,8 @@ public class OpportunityController {
     }
 
     @PostMapping
-    public ResponseEntity<OpportunityResponseDTO> create(@RequestBody @Valid OpportunityRequestDTO opportunityRequestDTO){
-        OpportunityResponseDTO opportunityResponseDTO = opportunityService.create(opportunityRequestDTO);
+    public ResponseEntity<OpportunityResponseDTO> create(@RequestBody @Valid OpportunityRequestDTO dto){
+        OpportunityResponseDTO opportunityResponseDTO = opportunityService.create(dto);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -62,8 +63,16 @@ public class OpportunityController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OpportunityResponseDTO> update(@PathVariable Long id,@RequestBody @Valid OpportunityRequestDTO opportunityRequestDTO){
-        return ResponseEntity.ok(opportunityService.update(id, opportunityRequestDTO));
+    public ResponseEntity<OpportunityResponseDTO> update(@PathVariable Long id,@RequestBody @Valid OpportunityRequestDTO dto){
+        return ResponseEntity.ok(opportunityService.update(id, dto));
+    }
+
+    @PatchMapping("/{id}/close")
+    public ResponseEntity<OpportunityResponseDTO> close(
+            @PathVariable Long id,
+            @RequestBody @Valid OpportunityCloseDTO dto
+    ) {
+        return ResponseEntity.ok(opportunityService.close(id, dto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -14,6 +14,6 @@ public record StageRequestDTO(
         @NotNull(message = "A posição do estágio é obrigatória")
         Integer position,
 
-        @NotNull(message = "Tipo do estágio é obrigatório")
-        StageType type
+        @NotNull(message = "O id do funíl precisa ser informado")
+        Long pipelineId
 ) {}

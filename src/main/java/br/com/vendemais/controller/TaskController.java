@@ -42,8 +42,8 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskResponseDTO> create(@RequestBody @Valid TaskRequestDTO taskRequestDTO){
-        TaskResponseDTO taskResponseDTO = taskService.create(taskRequestDTO);
+    public ResponseEntity<TaskResponseDTO> create(@RequestBody @Valid TaskRequestDTO dto){
+        TaskResponseDTO taskResponseDTO = taskService.create(dto);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -56,8 +56,8 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskResponseDTO> update(@PathVariable Long id,@RequestBody @Valid TaskRequestDTO taskRequestDTO){
-        return ResponseEntity.ok(taskService.update(id, taskRequestDTO));
+    public ResponseEntity<TaskResponseDTO> update(@PathVariable Long id,@RequestBody @Valid TaskRequestDTO dto){
+        return ResponseEntity.ok(taskService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")

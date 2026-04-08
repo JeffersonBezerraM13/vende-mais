@@ -63,22 +63,22 @@ public class PipelineController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{pipelineId}/stages")
-    public ResponseEntity<StageResponseDTO> createStage(@PathVariable Long pipelineId , @RequestBody @Valid StageRequestDTO stageRequestDTO){
-        return ResponseEntity.ok().body(stageService.createStage(pipelineId,stageRequestDTO));
+    @PostMapping("/stages")
+    public ResponseEntity<StageResponseDTO> createStage(@RequestBody @Valid StageRequestDTO dto){
+        return ResponseEntity.ok().body(stageService.createStage(dto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<PipelineResponseDTO> update(@PathVariable Long id,@RequestBody @Valid PipelineRequestDTO pipelineRequestDTO) {
-        return ResponseEntity.ok(pipelineService.update(id, pipelineRequestDTO));
+    public ResponseEntity<PipelineResponseDTO> update(@PathVariable Long id,@RequestBody @Valid PipelineRequestDTO dto) {
+        return ResponseEntity.ok(pipelineService.update(id, dto));
 
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{pipelineID}/stages/{stageId}")
-    public ResponseEntity<StageResponseDTO> updateStage(@PathVariable Long pipelineID, @PathVariable Long stageId, @RequestBody @Valid StageRequestDTO stageRequestDTO){
-        return ResponseEntity.ok().body(stageService.updateStage(pipelineID,stageId,stageRequestDTO));
+    @PutMapping("/stages/{stageId}")
+    public ResponseEntity<StageResponseDTO> updateStage(@PathVariable Long stageId, @RequestBody @Valid StageRequestDTO dto){
+        return ResponseEntity.ok().body(stageService.updateStage(stageId,dto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

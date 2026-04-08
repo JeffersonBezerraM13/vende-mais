@@ -8,7 +8,6 @@ public record StageResponseDTO(
         String name,
         String code,
         Integer position,
-        StageType type,
         Long pipelineId
 ) {
     public static StageResponseDTO daEntidade(Stage entidade) {
@@ -17,7 +16,6 @@ public record StageResponseDTO(
                 entidade.getName(),
                 entidade.getCode(),
                 entidade.getPosition(),
-                entidade.getType(),
                 entidade.getPipeline() != null ? entidade.getPipeline().getId() : null
         );
     }

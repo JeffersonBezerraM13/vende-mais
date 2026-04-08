@@ -1,8 +1,10 @@
 package br.com.vendemais.domain.dtos.opportunity;
 
 import br.com.vendemais.domain.enums.Solution;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,12 +24,9 @@ public record OpportunityRequestDTO(
         @NotNull(message = "O ID do Pipeline é obrigatório")
         Long pipelineId,
 
-        // Opcional: Se vier nulo, o Service pode automatizar pegando a primeira etapa do funil
         Long currentStageId,
 
         LocalDate expectedCloseDate,
-
-        String lossReason,
 
         String notes
 ) {}

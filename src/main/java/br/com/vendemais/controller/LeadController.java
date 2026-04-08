@@ -37,13 +37,13 @@ public class LeadController {
 
     @GetMapping("/{id}")
     public ResponseEntity<LeadResponseDTO> findById(@PathVariable Long id){
-        LeadResponseDTO leadResponseDTO = leadService.findById(id);
-        return ResponseEntity.ok().body(leadResponseDTO);
+        LeadResponseDTO dto = leadService.findById(id);
+        return ResponseEntity.ok().body(dto);
     }
 
     @PostMapping
-    public ResponseEntity<LeadResponseDTO> create(@RequestBody @Valid LeadRequestDTO leadRequestDTO){
-        LeadResponseDTO leadResponseDTO = leadService.create(leadRequestDTO);
+    public ResponseEntity<LeadResponseDTO> create(@RequestBody @Valid LeadRequestDTO dto){
+        LeadResponseDTO leadResponseDTO = leadService.create(dto);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -56,8 +56,8 @@ public class LeadController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LeadResponseDTO> update(@PathVariable Long id,@RequestBody @Valid LeadRequestDTO leadRequestDTO){
-        return ResponseEntity.ok(leadService.update(id, leadRequestDTO));
+    public ResponseEntity<LeadResponseDTO> update(@PathVariable Long id,@RequestBody @Valid LeadRequestDTO dto){
+        return ResponseEntity.ok(leadService.update(id, dto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

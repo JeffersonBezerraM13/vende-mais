@@ -30,22 +30,22 @@ public class PipelineService {
         return PipelineResponseDTO.daEntidade(pipeline);
     }
 
-    public PipelineResponseDTO create(PipelineRequestDTO pipelineRequestDTO) {
-        if(existsbyTitle(pipelineRequestDTO.title())){
+    public PipelineResponseDTO create(PipelineRequestDTO dto) {
+        if(existsbyTitle(dto.title())){
             throw new DataIntegrityViolationException("Pipeline já está cadastrado no sistema");
         }
 
         Pipeline pipeline = new Pipeline(
-                pipelineRequestDTO.title()
+                dto.title()
         );
 
         return PipelineResponseDTO.daEntidade(pipelineRepository.save(pipeline));
     }
 
-    public PipelineResponseDTO update(Long id, PipelineRequestDTO pipelineRequestDTO) {
+    public PipelineResponseDTO update(Long id, PipelineRequestDTO dto) {
         Pipeline pipeline = findPipelineById(id);
 
-        pipeline.setTitle(pipelineRequestDTO.title());
+        pipeline.setTitle(dto.title());
 
 
         return PipelineResponseDTO.daEntidade(pipelineRepository.save(pipeline));

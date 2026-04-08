@@ -1,13 +1,12 @@
 package br.com.vendemais.service;
 
+import br.com.vendemais.domain.dtos.opportunity.OpportunityCloseDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityRequestDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityResponseDTO;
 import br.com.vendemais.domain.entity.Lead;
 import br.com.vendemais.domain.entity.Opportunity;
 import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.domain.entity.Stage;
-import br.com.vendemais.domain.enums.LeadStatus;
-import br.com.vendemais.domain.enums.StageType;
 import br.com.vendemais.repository.LeadRepository;
 import br.com.vendemais.repository.OpportunityRepository;
 import br.com.vendemais.repository.PipelineRepository;
@@ -62,7 +61,7 @@ public class OpportunityService {
             throw new IllegalArgumentException("O ID do Lead não pode ser nulo.");
         }
 
-        return opportunityRepository.existsByLeadIdAndStageType(leadId, StageType.OPEN);
+        return opportunityRepository.existsByLeadIdAndClosedAtIsNull(leadId);
     }
 
     @Transactional
@@ -75,17 +74,13 @@ public class OpportunityService {
 
         Stage currentStage = resolveCurrentStage(dto.currentStageId(), pipeline);
 
-        validateLossReason(currentStage, dto.lossReason());
-
         Opportunity opportunity = new Opportunity(
                 lead,
                 dto.title(),
                 dto.definitiveSolution(),
                 dto.estimatedValue(),
-                pipeline,
                 currentStage,
                 dto.expectedCloseDate(),
-                currentStage.getType() == StageType.LOST ? dto.lossReason() : null,
                 dto.notes()
         );
 
@@ -107,17 +102,33 @@ public class OpportunityService {
 
         Stage currentStage = resolveCurrentStage(dto.currentStageId(), pipeline);
 
-        validateLossReason(currentStage, dto.lossReason());
-
         opportunity.setLead(lead);
         opportunity.setTitle(dto.title());
         opportunity.setDefinitiveSolution(dto.definitiveSolution());
         opportunity.setEstimatedValue(dto.estimatedValue());
-        opportunity.setPipeline(pipeline);
         opportunity.setCurrentStage(currentStage);
         opportunity.setExpectedCloseDate(dto.expectedCloseDate());
-        opportunity.setLossReason(currentStage.getType() == StageType.LOST ? dto.lossReason() : null);
         opportunity.setNotes(dto.notes());
+        opportunity.setUpdatedAt(LocalDate.now());
+
+        return OpportunityResponseDTO.daEntidade(opportunityRepository.save(opportunity));
+    }
+
+    @Transactional
+    public OpportunityResponseDTO close(Long id, OpportunityCloseDTO dto) {
+        Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
+
+        if (opportunity.getClosedAt() != null) {
+            throw new DataIntegrityViolationException("Essa oportunidade já foi fechada.");
+        }
+
+        if (Boolean.FALSE.equals(dto.win()) && (dto.lossReason() == null || dto.lossReason().isBlank())) {
+            throw new DataIntegrityViolationException("O motivo de perda é obrigatório quando a oportunidade é perdida.");
+        }
+
+        opportunity.setWon(dto.win());
+        opportunity.setClosedAt(LocalDate.now());
+        opportunity.setLossReason(Boolean.TRUE.equals(dto.win()) ? null : dto.lossReason().trim());
         opportunity.setUpdatedAt(LocalDate.now());
 
         return OpportunityResponseDTO.daEntidade(opportunityRepository.save(opportunity));
@@ -147,12 +158,5 @@ public class OpportunityService {
     public void delete(Long id){
         Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
         opportunityRepository.delete(opportunity);
-    }
-
-    private void validateLossReason(Stage currentStage, String lossReason) {
-        if (currentStage.getType() == StageType.LOST
-                && (lossReason == null || lossReason.isBlank())) {
-            throw new DataIntegrityViolationException("O motivo de perda é obrigatório para oportunidades perdidas.");
-        }
     }
 }

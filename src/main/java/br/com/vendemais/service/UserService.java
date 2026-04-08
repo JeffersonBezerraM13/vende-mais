@@ -35,25 +35,25 @@ public class UserService {
         return UserResponseDTO.daEntidade(User);
     }
 
-    public UserResponseDTO create(UserRequestDTO userRequestDTO) {
-        if(existsByEmail(userRequestDTO.email())){
+    public UserResponseDTO create(UserRequestDTO dto) {
+        if(existsByEmail(dto.email())){
             throw new DataIntegrityViolationException("User já está cadastrado no sistema");
         }
 
         User User = new User(
-                userRequestDTO.name(),
-                userRequestDTO.email(),
-                encoder.encode(userRequestDTO.password())
+                dto.name(),
+                dto.email(),
+                encoder.encode(dto.password())
         );
 
         return UserResponseDTO.daEntidade(UserRepository.save(User));
     }
 
-    public UserResponseDTO update(Long id, UserRequestDTO userRequestDTO) {
+    public UserResponseDTO update(Long id, UserRequestDTO dto) {
         User user = findUserById(id);
 
-        user.setEmail(userRequestDTO.email());
-        user.setPassword(encoder.encode(userRequestDTO.password()));
+        user.setEmail(dto.email());
+        user.setPassword(encoder.encode(dto.password()));
 
         return UserResponseDTO.daEntidade(UserRepository.save(user));
     }

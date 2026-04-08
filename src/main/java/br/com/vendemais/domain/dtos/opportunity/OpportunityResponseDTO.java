@@ -1,7 +1,6 @@
 package br.com.vendemais.domain.dtos.opportunity;
 
 import br.com.vendemais.domain.entity.Opportunity;
-import br.com.vendemais.domain.enums.StageType;
 import br.com.vendemais.domain.enums.Solution;
 
 import java.math.BigDecimal;
@@ -16,8 +15,9 @@ public record OpportunityResponseDTO(
         Long pipelineId,
         Long currentStageId,
         String currentStageName,
-        StageType currentStageType,
+        boolean won, // Adicionado para bater com o entity.isWon()
         LocalDate expectedCloseDate,
+        LocalDate closeDate,
         String lossReason,
         String notes,
         LocalDate createdAt,
@@ -30,11 +30,13 @@ public record OpportunityResponseDTO(
                 entity.getTitle(),
                 entity.getDefinitiveSolution(),
                 entity.getEstimatedValue(),
-                entity.getPipeline() != null ? entity.getPipeline().getId() : null,
+                (entity.getCurrentStage() != null && entity.getCurrentStage().getPipeline() != null)
+                        ? entity.getCurrentStage().getPipeline().getId() : null,
                 entity.getCurrentStage() != null ? entity.getCurrentStage().getId() : null,
                 entity.getCurrentStage() != null ? entity.getCurrentStage().getName() : null,
-                entity.getCurrentStage() != null ? entity.getCurrentStage().getType() : null,
+                entity.isWon(),
                 entity.getExpectedCloseDate(),
+                entity.getClosedAt(),
                 entity.getLossReason(),
                 entity.getNotes(),
                 entity.getCreatedAt(),

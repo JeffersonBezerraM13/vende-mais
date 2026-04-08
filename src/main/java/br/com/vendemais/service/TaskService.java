@@ -43,17 +43,17 @@ public class TaskService {
         return TaskResponseDTO.daEntidade(task);
     }
 
-    public TaskResponseDTO create(TaskRequestDTO taskRequestDTO) {
+    public TaskResponseDTO create(TaskRequestDTO dto) {
         Lead lead = null;
         Opportunity opportunity = null;
 
-        if (taskRequestDTO.leadId() != null) {
-            lead = leadRepository.findById(taskRequestDTO.leadId())
+        if (dto.leadId() != null) {
+            lead = leadRepository.findById(dto.leadId())
                     .orElseThrow(() -> new DataIntegrityViolationException("Lead não encontrado"));
         }
 
-        if (taskRequestDTO.opportunityId() != null) {
-            opportunity = opportunityRepository.findById(taskRequestDTO.opportunityId())
+        if (dto.opportunityId() != null) {
+            opportunity = opportunityRepository.findById(dto.opportunityId())
                     .orElseThrow(() -> new DataIntegrityViolationException("Oportunidade não encontrada"));
         }
 
@@ -62,10 +62,10 @@ public class TaskService {
         }
 
         Task task = new Task(
-                taskRequestDTO.title(),
-                taskRequestDTO.description(),
-                taskRequestDTO.taskStatus(), // Ou defina como PENDING por padrão, dependendo de como você fez
-                taskRequestDTO.dueDate(),
+                dto.title(),
+                dto.description(),
+                dto.taskStatus(), // Ou defina como PENDING por padrão, dependendo de como você fez
+                dto.dueDate(),
                 lead,
                 opportunity
         );
@@ -73,19 +73,19 @@ public class TaskService {
         return TaskResponseDTO.daEntidade(taskRepository.save(task));
     }
 
-    public TaskResponseDTO update(Long id, TaskRequestDTO taskRequestDTO) {
+    public TaskResponseDTO update(Long id, TaskRequestDTO dto) {
         Task task = findTaskById(id);
 
         Lead lead = null;
         Opportunity op = null;
 
-        if (taskRequestDTO.leadId() != null) {
-            lead = leadRepository.findById(taskRequestDTO.leadId())
+        if (dto.leadId() != null) {
+            lead = leadRepository.findById(dto.leadId())
                     .orElseThrow(() -> new ObjectNotFoundException("Lead não encontrado"));
         }
 
-        if (taskRequestDTO.opportunityId() != null) {
-            op = opportunityRepository.findById(taskRequestDTO.opportunityId())
+        if (dto.opportunityId() != null) {
+            op = opportunityRepository.findById(dto.opportunityId())
                     .orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
         }
 
@@ -93,12 +93,12 @@ public class TaskService {
             throw new DataIntegrityViolationException("Toda tarefa deve estar vinculada a um Lead ou a uma Oportunidade.");
         }
 
-        task.setTitle(taskRequestDTO.title());
-        task.setDescription(taskRequestDTO.description());
-        if (taskRequestDTO.taskStatus() != null) {
-            task.setStatus(taskRequestDTO.taskStatus());
+        task.setTitle(dto.title());
+        task.setDescription(dto.description());
+        if (dto.taskStatus() != null) {
+            task.setStatus(dto.taskStatus());
         }
-        task.setDueDate(taskRequestDTO.dueDate());
+        task.setDueDate(dto.dueDate());
         task.setLead(lead);
         task.setOpportunity(op);
         task.setUpdatedAt(LocalDate.now());

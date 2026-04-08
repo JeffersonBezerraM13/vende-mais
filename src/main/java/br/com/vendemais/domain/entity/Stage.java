@@ -19,19 +19,14 @@ public class Stage {
     @Column(unique = true)
     private Integer position;
 
-    //tirar essa informação
-    @Enumerated(EnumType.STRING)
-    private StageType type;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pipeline_id")
     private Pipeline pipeline;
 
-    public Stage(String name, String code, Integer position, StageType type, Pipeline pipeline) {
+    public Stage(String name, String code, Integer position, Pipeline pipeline) {
         this.name = name;
         this.code = code;
         this.position = position;
-        this.type = type;
         this.pipeline = pipeline;
     }
 
@@ -59,26 +54,6 @@ public class Stage {
 
     public void setPosition(Integer position) {
         this.position = position;
-    }
-
-    public StageType getType() {
-        return type;
-    }
-
-    public void setType(StageType type) {
-        this.type = type;
-    }
-
-    public boolean isOpen() {
-        return this.type == StageType.OPEN;
-    }
-
-    public boolean isWon() {
-        return this.type == StageType.WON;
-    }
-
-    public boolean isLost() {
-        return this.type == StageType.LOST;
     }
 
     public Pipeline getPipeline() {

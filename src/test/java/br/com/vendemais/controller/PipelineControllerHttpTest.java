@@ -79,8 +79,8 @@ class PipelineControllerHttpTest {
 
     @Test
     void createStageReturnsOkForAdmin() throws Exception {
-        StageRequestDTO request = new StageRequestDTO("Qualified", "QUALIFIED", 2, StageType.OPEN);
-        StageResponseDTO response = new StageResponseDTO(9L, "Qualified", "QUALIFIED", 2, StageType.OPEN, 3L);
+        StageRequestDTO request = new StageRequestDTO("Qualified", "QUALIFIED", 2,1L);
+        StageResponseDTO response = new StageResponseDTO(9L, "Qualified", "QUALIFIED", 2, 3L);
 
         when(stageService.createStage(eq(3L), eq(request))).thenReturn(response);
 

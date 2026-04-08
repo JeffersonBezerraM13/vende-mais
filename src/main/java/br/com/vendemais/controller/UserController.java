@@ -43,8 +43,8 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserRequestDTO userRequestDTO){
-        UserResponseDTO userResponseDTO = userService.create(userRequestDTO);
+    public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserRequestDTO dto){
+        UserResponseDTO userResponseDTO = userService.create(dto);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -58,8 +58,8 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> update(@PathVariable Long id,@RequestBody @Valid UserRequestDTO userRequestDTO){
-        return ResponseEntity.ok(userService.update(id, userRequestDTO));
+    public ResponseEntity<UserResponseDTO> update(@PathVariable Long id,@RequestBody @Valid UserRequestDTO dto){
+        return ResponseEntity.ok(userService.update(id, dto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

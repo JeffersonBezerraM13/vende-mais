@@ -33,38 +33,38 @@ public class LeadService {
         return LeadResponseDTO.daEntidade(lead);
     }
 
-    public LeadResponseDTO create(LeadRequestDTO leadRequestDTO) {
-        if(existsByEmail(leadRequestDTO.email())){
+    public LeadResponseDTO create(LeadRequestDTO dto) {
+        if(existsByEmail(dto.email())){
             throw new DataIntegrityViolationException("Lead já está cadastrado no sistema");
         }
 
         Lead lead = new Lead(
-                leadRequestDTO.name(),
-                leadRequestDTO.phone(),
-                leadRequestDTO.email(),
-                leadRequestDTO.personType(),
-                leadRequestDTO.companyName(),
-                leadRequestDTO.interestSoluction(),
-                leadRequestDTO.leadSource(),
-                leadRequestDTO.entryMethod(),
-                leadRequestDTO.notes()
+                dto.name(),
+                dto.phone(),
+                dto.email(),
+                dto.personType(),
+                dto.companyName(),
+                dto.interestSoluction(),
+                dto.leadSource(),
+                dto.entryMethod(),
+                dto.notes()
         );
 
         return LeadResponseDTO.daEntidade(leadRepository.save(lead));
     }
 
-    public LeadResponseDTO update(Long id, LeadRequestDTO leadRequestDTO) {
+    public LeadResponseDTO update(Long id, LeadRequestDTO dto) {
         Lead lead = findLeadById(id);
 
-        lead.setName(leadRequestDTO.name());
-        lead.setPhone(leadRequestDTO.phone());
-        lead.setEmail(leadRequestDTO.email());
-        lead.setPersonType(leadRequestDTO.personType());
-        lead.setCompanyName(leadRequestDTO.companyName());
-        lead.setInterestSoluction(leadRequestDTO.interestSoluction());
-        lead.setLeadSource(leadRequestDTO.leadSource());
-        lead.setEntryMethod(leadRequestDTO.entryMethod());
-        lead.setNotes(leadRequestDTO.notes());
+        lead.setName(dto.name());
+        lead.setPhone(dto.phone());
+        lead.setEmail(dto.email());
+        lead.setPersonType(dto.personType());
+        lead.setCompanyName(dto.companyName());
+        lead.setInterestSoluction(dto.interestSoluction());
+        lead.setLeadSource(dto.leadSource());
+        lead.setEntryMethod(dto.entryMethod());
+        lead.setNotes(dto.notes());
         lead.setUpdatedAt(LocalDate.now());
 
         return LeadResponseDTO.daEntidade(leadRepository.save(lead));

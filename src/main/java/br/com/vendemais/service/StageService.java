@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 public class StageService {
 
     private final StageRepository stageRepository;
-
     private final PipelineRepository pipelineRepository;
 
     public StageService(StageRepository stageRepository,PipelineRepository pipelineRepository) {
@@ -35,17 +34,14 @@ public class StageService {
         return StageResponseDTO.daEntidade(findStageById(id));
     }
 
-    public StageResponseDTO createStage(Long pipelineId, StageRequestDTO dto) {
-        Pipeline pipeline = pipelineRepository.findById(pipelineId)
+    public StageResponseDTO createStage(StageRequestDTO dto) {
+        Pipeline pipeline = pipelineRepository.findById(dto.pipelineId())
                 .orElseThrow(() -> new DataIntegrityViolationException("Funil não encontrado"));
-
-        validateStageCreation(pipelineId, dto);
 
         Stage stage = new Stage(
                 dto.name(),
                 dto.code(),
                 dto.position(),
-                dto.type(),
                 pipeline
         );
 
@@ -54,55 +50,14 @@ public class StageService {
         return StageResponseDTO.daEntidade(stageRepository.save(stage));
     }
 
-    public StageResponseDTO updateStage(Long pipelineId, Long stageId, StageRequestDTO dto) {
-        Stage stage = stageRepository.findByIdAndPipelineId(stageId, pipelineId)
+    public StageResponseDTO updateStage(Long stageId, StageRequestDTO dto) {
+        Stage stage = stageRepository.findByIdAndPipelineId(stageId, dto.pipelineId())
                 .orElseThrow(() -> new ObjectNotFoundException("Esse estágio não pertence a esse funil"));
-
-        validateStageUpdate(pipelineId, stageId, dto);
 
         stage.setName(dto.name());
         stage.setPosition(dto.position());
-        stage.setType(dto.type());
 
         return StageResponseDTO.daEntidade(stageRepository.save(stage));
-    }
-
-    private void validateStageCreation(Long pipelineId, StageRequestDTO dto) {
-        if (stageRepository.existsByPipelineIdAndPosition(pipelineId, dto.position())) {
-            throw new DataIntegrityViolationException("Já existe uma etapa com essa posição neste funil");
-        }
-
-        validateUniqueTerminalType(pipelineId, dto.type(), null);
-    }
-
-    private void validateStageUpdate(Long pipelineId, Long stageId, StageRequestDTO dto) {
-        if (stageRepository.existsByPipelineIdAndPositionAndIdNot(pipelineId, dto.position(), stageId)) {
-            throw new DataIntegrityViolationException("Já existe uma etapa com essa posição neste funil");
-        }
-
-        validateUniqueTerminalType(pipelineId, dto.type(), stageId);
-    }
-
-    private void validateUniqueTerminalType(Long pipelineId, StageType type, Long stageId) {
-        if (type == StageType.WON) {
-            boolean existsWon = stageId == null
-                    ? stageRepository.existsByPipelineIdAndType(pipelineId, StageType.WON)
-                    : stageRepository.existsByPipelineIdAndTypeAndIdNot(pipelineId, StageType.WON, stageId);
-
-            if (existsWon) {
-                throw new DataIntegrityViolationException("O funil já possui uma etapa do tipo WON");
-            }
-        }
-
-        if (type == StageType.LOST) {
-            boolean existsLost = stageId == null
-                    ? stageRepository.existsByPipelineIdAndType(pipelineId, StageType.LOST)
-                    : stageRepository.existsByPipelineIdAndTypeAndIdNot(pipelineId, StageType.LOST, stageId);
-
-            if (existsLost) {
-                throw new DataIntegrityViolationException("O funil já possui uma etapa do tipo LOST");
-            }
-        }
     }
 
     private Stage findStageById(Long id) {
