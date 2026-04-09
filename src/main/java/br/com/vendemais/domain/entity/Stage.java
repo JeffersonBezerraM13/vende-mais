@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Represents a single ordered checkpoint inside a sales pipeline.
+ */
 @Entity
 public class Stage {
 

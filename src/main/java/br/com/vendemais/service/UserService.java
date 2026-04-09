@@ -12,6 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+/**
+ * Handles CRM user administration, including credential hashing and uniqueness
+ * validation.
+ */
 @Service
 public class UserService {
 
@@ -24,17 +28,40 @@ public class UserService {
         this.encoder = encoder;
     };
 
+    /**
+     * Retrieves CRM users in pages so administrators can inspect the access base
+     * efficiently.
+     *
+     * @param pageable pagination and sorting instructions for the query
+     * @return a page containing user projections mapped to response DTOs
+     */
     public Page<UserResponseDTO> findAll(Pageable pageable) {
         Page<User> paginaDeUsers = UserRepository.findAll(pageable);
 
         return paginaDeUsers.map(UserResponseDTO::daEntidade);
     }
 
+    /**
+     * Loads a user account by identifier so profile and authorization data can be
+     * displayed.
+     *
+     * @param id identifier of the user to retrieve
+     * @return the requested user mapped to the API response DTO
+     * @throws ObjectNotFoundException if the user does not exist
+     */
     public UserResponseDTO findById(Long id) {
         User User = findUserById(id);
         return UserResponseDTO.daEntidade(User);
     }
 
+    /**
+     * Creates a CRM user account and hashes the provided password before
+     * persistence.
+     *
+     * @param dto payload describing the account to provision
+     * @return the persisted user mapped to the API response DTO
+     * @throws DataIntegrityViolationException if another account already uses the same email
+     */
     public UserResponseDTO create(UserRequestDTO dto) {
         if(existsByEmail(dto.email())){
             throw new DataIntegrityViolationException("User já está cadastrado no sistema");
@@ -49,6 +76,15 @@ public class UserService {
         return UserResponseDTO.daEntidade(UserRepository.save(User));
     }
 
+    /**
+     * Updates a user account and re-hashes the supplied password before saving
+     * the new credentials.
+     *
+     * @param id identifier of the user being updated
+     * @param dto payload containing the revised account data
+     * @return the persisted user mapped to the API response DTO
+     * @throws ObjectNotFoundException if the user does not exist
+     */
     public UserResponseDTO update(Long id, UserRequestDTO dto) {
         User user = findUserById(id);
 
@@ -58,6 +94,12 @@ public class UserService {
         return UserResponseDTO.daEntidade(UserRepository.save(user));
     }
 
+    /**
+     * Deletes a CRM user account when access must be revoked permanently.
+     *
+     * @param id identifier of the user to delete
+     * @throws ObjectNotFoundException if the user does not exist
+     */
     public void delete(Long id){
         User user = findUserById(id);
         UserRepository.delete(user);

@@ -30,7 +30,11 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_MATCHES = {
-            "/h2-console/**"
+            "/h2-console/**",
+            "/login",
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
     };
 
     @Autowired

@@ -12,6 +12,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Validates bearer tokens on incoming requests and restores the authenticated
+ * CRM user into the Spring Security context.
+ */
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
@@ -22,6 +26,16 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Resolves the bearer token from the request, validates it, and attaches the
+     * authenticated user to the current security context when the token is valid.
+     *
+     * @param request current HTTP request being processed
+     * @param response current HTTP response
+     * @param filterChain remaining filters in the security chain
+     * @throws ServletException if the filter chain fails while processing the request
+     * @throws IOException if request processing fails due to I/O issues
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

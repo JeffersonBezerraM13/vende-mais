@@ -18,6 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * Orchestrates opportunity lifecycle rules, including pipeline assignment, stage
+ * validation, and win/loss closing logic.
+ */
 @Service
 public class OpportunityService {
 
@@ -41,12 +45,27 @@ public class OpportunityService {
         this.taskRepository = taskRepository;
     }
 
+    /**
+     * Retrieves opportunities in pages so pipeline and portfolio screens can be
+     * rendered efficiently.
+     *
+     * @param pageable pagination and sorting instructions for the query
+     * @return a page containing opportunity projections mapped to response DTOs
+     */
     public Page<OpportunityResponseDTO> findAll(Pageable pageable) {
         Page<Opportunity> paginaDeOpportunitys = opportunityRepository.findAll(pageable);
 
         return paginaDeOpportunitys.map(OpportunityResponseDTO::daEntidade);
     }
 
+    /**
+     * Loads a single opportunity so the CRM can display its commercial and
+     * pipeline context.
+     *
+     * @param id identifier of the opportunity to retrieve
+     * @return the requested opportunity mapped to the API response DTO
+     * @throws ObjectNotFoundException if the opportunity does not exist
+     */
     public OpportunityResponseDTO findById(Long id) {
         Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
         return OpportunityResponseDTO.daEntidade(opportunity);
@@ -56,6 +75,14 @@ public class OpportunityService {
         return opportunityRepository.findById(id);
     }
 
+    /**
+     * Checks whether a lead already has open negotiations before another
+     * opportunity is created for it.
+     *
+     * @param leadId identifier of the lead being inspected
+     * @return {@code true} when the lead has at least one opportunity without a close date
+     * @throws IllegalArgumentException if {@code leadId} is {@code null}
+     */
     public boolean hasOpenOpportunities(Long leadId) {
         if (leadId == null) {
             throw new IllegalArgumentException("O ID do Lead não pode ser nulo.");
@@ -64,6 +91,14 @@ public class OpportunityService {
         return opportunityRepository.existsByLeadIdAndClosedAtIsNull(leadId);
     }
 
+    /**
+     * Creates a new opportunity and validates that the referenced lead, pipeline,
+     * and stage form a consistent CRM context.
+     *
+     * @param dto payload describing the opportunity to persist
+     * @return the persisted opportunity mapped to the API response DTO
+     * @throws DataIntegrityViolationException if referenced lead, pipeline, or stage data is invalid
+     */
     @Transactional
     public OpportunityResponseDTO create(OpportunityRequestDTO dto) {
         Lead lead = leadRepository.findById(dto.leadId())
@@ -89,6 +124,16 @@ public class OpportunityService {
         return OpportunityResponseDTO.daEntidade(opportunityRepository.save(opportunity));
     }
 
+    /**
+     * Updates an opportunity while enforcing that the selected stage belongs to
+     * the selected pipeline.
+     *
+     * @param id identifier of the opportunity being updated
+     * @param dto payload containing the revised opportunity state
+     * @return the persisted opportunity mapped to the API response DTO
+     * @throws ObjectNotFoundException if the opportunity does not exist
+     * @throws DataIntegrityViolationException if referenced lead, pipeline, or stage data is invalid
+     */
     @Transactional
     public OpportunityResponseDTO update(Long id, OpportunityRequestDTO dto) {
         Opportunity opportunity = opportunityRepository.findById(id)
@@ -114,6 +159,16 @@ public class OpportunityService {
         return OpportunityResponseDTO.daEntidade(opportunityRepository.save(opportunity));
     }
 
+    /**
+     * Closes an opportunity as won or lost and enforces the rule that lost deals
+     * must record a loss reason.
+     *
+     * @param id identifier of the opportunity being closed
+     * @param dto payload indicating the closing outcome
+     * @return the persisted opportunity mapped to the API response DTO
+     * @throws ObjectNotFoundException if the opportunity does not exist
+     * @throws DataIntegrityViolationException if the opportunity is already closed or lacks a loss reason
+     */
     @Transactional
     public OpportunityResponseDTO close(Long id, OpportunityCloseDTO dto) {
         Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
@@ -155,6 +210,13 @@ public class OpportunityService {
         return stage;
     }
 
+    /**
+     * Deletes an opportunity and removes dependent tasks so no orphan follow-ups
+     * remain linked to a deleted negotiation.
+     *
+     * @param id identifier of the opportunity to delete
+     * @throws ObjectNotFoundException if the opportunity does not exist
+     */
     @Transactional
     public void delete(Long id){
         Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));

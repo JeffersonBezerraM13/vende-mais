@@ -12,43 +12,44 @@ import java.util.Base64;
 import java.util.Date;
 
 /**
- * Componente responsável pela geração de tokens JWT e fornecimento da chave secreta usada para assinatura.
+ * Provides JWT creation and validation utilities used by the CRM authentication
+ * flow.
  */
 @Component
 public class JWTUtil {
 
     /**
-     * Tempo de expiração do token (em milissegundos), definido no application.properties.
-     * Exemplo: 180000 (3 minutos)
+     * Token expiration time in milliseconds, configured through application
+     * properties.
      */
     @Value("${jwt.expiration}")
     private Long expiration;
 
     /**
-     * Chave secreta codificada em Base64, usada para assinar o token.
-     * Deve ter no mínimo 512 bits para o algoritmo HS512.
+     * Base64-encoded secret key used to sign the token with the HS512 algorithm.
      */
     @Value("${jwt.secret}")
     private String jwtSecretBase64;
 
     /**
-     * Gera um token JWT com base no e-mail do usuário.
+     * Generates a signed JWT for the authenticated user identified by email.
      *
-     * @param email Identificador do usuário (geralmente o e-mail)
-     * @return String contendo o token JWT gerado
+     * @param email email used as the token subject
+     * @return signed JWT that can be used to access protected endpoints
      */
     public String generateToken(String email) {
         return Jwts.builder()
-                .setSubject(email) // Define a informação principal (subject) do token: o e-mail do usuário
-                .setExpiration(new Date(System.currentTimeMillis() + expiration)) // Define a data de expiração
+                .setSubject(email) // Define a informaÃ§Ã£o principal (subject) do token: o e-mail do usuÃ¡rio
+                .setExpiration(new Date(System.currentTimeMillis() + expiration)) // Define a data de expiraÃ§Ã£o
                 .signWith(getSecretKey(), SignatureAlgorithm.HS512) // Assina o token com a chave segura
                 .compact(); // Compacta o token (gera a string final do JWT)
     }
 
     /**
-     * Decodifica a chave secreta em Base64 e retorna uma instância de SecretKey compatível com HS512.
+     * Decodes the configured secret and returns a signing key compatible with
+     * HS512.
      *
-     * @return SecretKey segura e válida para uso com o JWT
+     * @return secret key used to sign and validate JWT tokens
      */
     public SecretKey getSecretKey() {
         byte[] keyBytes = Base64.getDecoder().decode(jwtSecretBase64);
@@ -56,7 +57,11 @@ public class JWTUtil {
     }
 
     /**
-     * Verifica se o token é válido (assinado corretamente e não expirado).
+     * Validates that the token is correctly signed and still within its validity
+     * window.
+     *
+     * @param token JWT received from the client
+     * @return {@code true} when the token is valid and not expired
      */
     public boolean validToken(String token) {
         Claims claims = getClaims(token);
@@ -73,7 +78,10 @@ public class JWTUtil {
     }
 
     /**
-     * Extrai o nome de usuário (subject) do token.
+     * Extracts the user identifier stored as the token subject.
+     *
+     * @param token JWT received from the client
+     * @return email stored in the token subject, or {@code null} when the token is invalid
      */
     public String getUserName(String token) {
         Claims claims = getClaims(token);
@@ -84,7 +92,7 @@ public class JWTUtil {
     }
 
     /**
-     * Obtém os Claims (dados) contidos no token JWT (Base64 - Retornado no metodo .getSecretKey()).
+     * Parses the claims embedded in the JWT using the configured signing key.
      */
     private Claims getClaims(String token) {
         try {

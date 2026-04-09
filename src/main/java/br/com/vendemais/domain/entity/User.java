@@ -11,6 +11,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Represents an authenticated CRM account with role-based access to protected
+ * operations.
+ */
 @Entity
 @Table (name = "tb_user")
 public class User {
@@ -68,6 +72,12 @@ public class User {
         return this.roles.stream().map(Role::toEnum).collect(Collectors.toSet());
     }
 
+    /**
+     * Grants an additional role to the user so authorization checks can permit
+     * the corresponding CRM capabilities.
+     *
+     * @param role role to be associated with the user
+     */
     public void addRole(Role role){
         this.roles.add(role.getCode());
     }

@@ -8,6 +8,10 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Represents a follow-up activity scheduled for a lead or opportunity to keep
+ * the sales process moving.
+ */
 @Entity
 public class Task {
 
@@ -23,7 +27,7 @@ public class Task {
 
     private TaskStatus taskStatus;
 
-    @NotNull(message = "Data de vencimento não pode ser vazia")
+    @NotNull(message = "Data de vencimento nÃ£o pode ser vazia")
     private LocalDate dueDate;
 
     @ManyToOne

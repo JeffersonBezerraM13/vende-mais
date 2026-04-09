@@ -10,6 +10,10 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Represents a prospect or potential customer captured in the CRM before or
+ * during qualification.
+ */
 @Entity
 public class Lead {
 
@@ -61,6 +65,12 @@ public class Lead {
 
     protected Lead() {}
 
+    /**
+     * Validates that manual timestamp adjustments do not place the update date
+     * before the original capture date of the lead.
+     *
+     * @return {@code true} when the temporal consistency rule is respected
+     */
     @AssertTrue(message = "A data de criação não pode ser anterior à data de atualização")
     public boolean isUpdateAtValid() {
         if (createdAt == null || updatedAt == null) return true;

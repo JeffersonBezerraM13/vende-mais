@@ -17,6 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+/**
+ * Manages follow-up tasks linked to leads or opportunities so execution remains
+ * aligned with the sales process.
+ */
 @Service
 public class TaskService {
 
@@ -32,17 +36,39 @@ public class TaskService {
         this.taskRepository = taskRepository;
     };
 
+    /**
+     * Retrieves tasks in pages so CRM activity views can be rendered efficiently.
+     *
+     * @param pageable pagination and sorting instructions for the query
+     * @return a page containing task projections mapped to response DTOs
+     */
     public Page<TaskResponseDTO> findAll(Pageable pageable) {
         Page<Task> paginaDeTasks = taskRepository.findAll(pageable);
 
         return paginaDeTasks.map(TaskResponseDTO::daEntidade);
     }
 
+    /**
+     * Loads a task by identifier so users can inspect its schedule, status, and
+     * linked commercial record.
+     *
+     * @param id identifier of the task to retrieve
+     * @return the requested task mapped to the API response DTO
+     * @throws ObjectNotFoundException if the task does not exist
+     */
     public TaskResponseDTO findById(Long id) {
         Task task = findTaskById(id);
         return TaskResponseDTO.daEntidade(task);
     }
 
+    /**
+     * Creates a task and enforces the CRM rule that every activity must be linked
+     * to a lead or an opportunity.
+     *
+     * @param dto payload describing the task to schedule
+     * @return the persisted task mapped to the API response DTO
+     * @throws DataIntegrityViolationException if the linked lead or opportunity is invalid or absent
+     */
     public TaskResponseDTO create(TaskRequestDTO dto) {
         Lead lead = null;
         Opportunity opportunity = null;
@@ -73,6 +99,16 @@ public class TaskService {
         return TaskResponseDTO.daEntidade(taskRepository.save(task));
     }
 
+    /**
+     * Updates a task while revalidating its linkage to the commercial records it
+     * supports.
+     *
+     * @param id identifier of the task being updated
+     * @param dto payload containing the revised task data
+     * @return the persisted task mapped to the API response DTO
+     * @throws ObjectNotFoundException if the task or one of its referenced records does not exist
+     * @throws DataIntegrityViolationException if the task is left without a lead or opportunity linkage
+     */
     public TaskResponseDTO update(Long id, TaskRequestDTO dto) {
         Task task = findTaskById(id);
 
@@ -106,6 +142,12 @@ public class TaskService {
         return TaskResponseDTO.daEntidade(taskRepository.save(task));
     }
 
+    /**
+     * Deletes a task when the follow-up is no longer relevant to the CRM process.
+     *
+     * @param id identifier of the task to delete
+     * @throws ObjectNotFoundException if the task does not exist
+     */
     public void delete(Long id){
         Task task = findTaskById(id);
         taskRepository.delete(task);

@@ -10,6 +10,10 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Adapts the CRM user entity to Spring Security's {@link UserDetails} contract
+ * while preserving the internal user id for downstream authorization logic.
+ */
 public class UsuarioSecurity implements UserDetails {
 
     private Long id;

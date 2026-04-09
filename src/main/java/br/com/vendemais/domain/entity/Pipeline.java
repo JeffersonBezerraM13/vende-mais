@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 import java.util.*;
 
 
+/**
+ * Represents a sales pipeline that groups and orders the stages used to advance
+ * opportunities.
+ */
 @Entity
 public class Pipeline {
 
@@ -36,14 +40,32 @@ public class Pipeline {
         this.title = title;
     }
 
+    /**
+     * Attaches a stage to this pipeline so it becomes part of the ordered funnel
+     * definition.
+     *
+     * @param stage stage to be managed by this pipeline
+     */
     public void addStage(Stage stage) {
         stages.add(stage);
     }
 
+    /**
+     * Removes a stage from this pipeline when the funnel definition is being
+     * reconfigured.
+     *
+     * @param stage stage to be detached from this pipeline
+     */
     public void removeStage(Stage stage) {
         stages.remove(stage);
     }
 
+    /**
+     * Returns the earliest stage in the pipeline so new opportunities can start
+     * in the correct position when no explicit stage is provided.
+     *
+     * @return the first configured stage, or {@code null} when the pipeline has no stages
+     */
     public Stage getFirstStage() {
         if (stages == null || stages.isEmpty()) {
             return null;

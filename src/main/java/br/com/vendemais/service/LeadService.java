@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+/**
+ * Coordinates lead persistence and validation rules for prospects entering the
+ * CRM.
+ */
 @Service
 public class LeadService {
 
@@ -22,17 +26,40 @@ public class LeadService {
         this.leadRepository = leadRepository;
     };
 
+    /**
+     * Retrieves leads in pages so prospect lists can be rendered efficiently in
+     * the CRM.
+     *
+     * @param pageable pagination and sorting instructions for the query
+     * @return a page containing lead projections mapped to response DTOs
+     */
     public Page<LeadResponseDTO> findAll(Pageable pageable) {
         Page<Lead> paginaDeLeads = leadRepository.findAll(pageable);
 
         return paginaDeLeads.map(LeadResponseDTO::daEntidade);
     }
 
+    /**
+     * Loads a lead by identifier so client applications can inspect the full
+     * prospect context.
+     *
+     * @param id identifier of the lead to retrieve
+     * @return the requested lead mapped to the API response DTO
+     * @throws ObjectNotFoundException if the lead does not exist
+     */
     public LeadResponseDTO findById(Long id) {
         Lead lead = findLeadById(id);
         return LeadResponseDTO.daEntidade(lead);
     }
 
+    /**
+     * Registers a new lead after enforcing the CRM rule that each prospect email
+     * must be unique.
+     *
+     * @param dto payload describing the lead being captured
+     * @return the persisted lead mapped to the API response DTO
+     * @throws DataIntegrityViolationException if another lead already uses the same email
+     */
     public LeadResponseDTO create(LeadRequestDTO dto) {
         if(existsByEmail(dto.email())){
             throw new DataIntegrityViolationException("Lead já está cadastrado no sistema");
@@ -53,6 +80,15 @@ public class LeadService {
         return LeadResponseDTO.daEntidade(leadRepository.save(lead));
     }
 
+    /**
+     * Updates an existing lead so qualification data stays current across the CRM
+     * workflow.
+     *
+     * @param id identifier of the lead being updated
+     * @param dto payload containing the revised lead data
+     * @return the persisted lead mapped to the API response DTO
+     * @throws ObjectNotFoundException if the lead does not exist
+     */
     public LeadResponseDTO update(Long id, LeadRequestDTO dto) {
         Lead lead = findLeadById(id);
 
@@ -70,6 +106,13 @@ public class LeadService {
         return LeadResponseDTO.daEntidade(leadRepository.save(lead));
     }
 
+    /**
+     * Removes a lead from the CRM when it should no longer remain in the prospect
+     * base.
+     *
+     * @param id identifier of the lead to delete
+     * @throws ObjectNotFoundException if the lead does not exist
+     */
     public void delete(Long id){
         Lead lead = findLeadById(id);
         leadRepository.delete(lead);

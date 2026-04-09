@@ -16,11 +16,8 @@ import java.io.IOException;
 import java.util.Date;
 
 /**
- * Este filtro é responsável por interceptar requisições POST para o endpoint "/login",
- * que é reservado pelo Spring Security para autenticação.
- *
- * Ao estender UsernamePasswordAuthenticationFilter, o Spring automaticamente entende
- * que esta classe será usada para o processo de login.
+ * Intercepts login requests, authenticates the submitted credentials, and emits
+ * a JWT that grants access to protected CRM endpoints.
  */
 public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -31,16 +28,17 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
         super(defaultFilterProcessesUrl);
         setAuthenticationManager(authenticationManager);
         this.jwtUtil = jwtUtil;
-        setFilterProcessesUrl("/login"); // Define o endpoint que será interceptado por este filtro
+        setFilterProcessesUrl("/login"); // Define o endpoint que serÃ¡ interceptado por este filtro
     }
 
     /**
-     * Tenta autenticar o usuário com base nas credenciais enviadas na requisição.
+     * Attempts to authenticate the user with the email and password supplied in
+     * the login request body.
      *
-     * @param request  Requisição HTTP contendo o corpo com email e senha
-     * @param response Resposta HTTP
-     * @return Objeto Authentication representando o usuário autenticado
-     * @throws AuthenticationException se a autenticação falhar
+     * @param request HTTP request containing the submitted credentials
+     * @param response HTTP response associated with the login attempt
+     * @return the authenticated principal returned by the authentication manager
+     * @throws AuthenticationException if the credentials are rejected
      */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
@@ -53,13 +51,13 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
     }
 
     /**
-     * Este método é chamado automaticamente quando a autenticação for bem-sucedida.
-     * Ele gera o token JWT e o adiciona no cabeçalho da resposta.
+     * Writes the JWT into the response headers when authentication succeeds so
+     * the client can authenticate subsequent API calls.
      *
-     * @param request     Requisição HTTP
-     * @param response    Resposta HTTP
-     * @param chain       Filtro da requisição
-     * @param authResult  Resultado da autenticação
+     * @param request HTTP request that triggered authentication
+     * @param response HTTP response that will carry the generated token
+     * @param chain filter chain associated with the current request
+     * @param authResult successful authentication result
      */
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
@@ -74,12 +72,12 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
     }
 
     /**
-     * Este método é chamado automaticamente quando a autenticação falha.
-     * Aqui você pode personalizar a resposta de erro (401 - Unauthorized).
+     * Returns the standardized 401 payload used when login credentials are
+     * invalid.
      *
-     * @param request  Requisição HTTP
-     * @param response Resposta HTTP
-     * @param failed   Exceção lançada na tentativa de autenticação
+     * @param request HTTP request that failed authentication
+     * @param response HTTP response that will receive the error payload
+     * @param failed authentication exception raised by the login attempt
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
@@ -92,17 +90,17 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
     }
 
     /**
-     * Gera a estrutura JSON da resposta de erro 401.
+     * Builds the JSON body returned when authentication fails.
      *
-     * @return String JSON com detalhes do erro
+     * @return JSON representation of the unauthorized error contract
      */
     private String buildJsonError() {
         long timestamp = new Date().getTime();
         return "{"
                 + "\"timestamp\": " + timestamp + ","
                 + "\"status\": 401,"
-                + "\"error\": \"Não autorizado\","
-                + "\"message\": \"Email ou senha inválidos\","
+                + "\"error\": \"NÃ£o autorizado\","
+                + "\"message\": \"Email ou senha invÃ¡lidos\","
                 + "\"path\": \"/login\""
                 + "}";
     }

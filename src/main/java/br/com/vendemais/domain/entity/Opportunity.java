@@ -8,6 +8,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Represents a qualified sales opportunity tracked through a pipeline until it
+ * is won or lost.
+ */
 @Entity
 public class Opportunity {
 
