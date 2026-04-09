@@ -18,6 +18,7 @@ public class Task {
     @NotBlank(message = "Uma task deve ter um nome")
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private TaskStatus taskStatus;

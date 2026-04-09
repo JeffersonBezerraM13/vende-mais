@@ -7,10 +7,7 @@ import br.com.vendemais.domain.entity.Lead;
 import br.com.vendemais.domain.entity.Opportunity;
 import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.domain.entity.Stage;
-import br.com.vendemais.repository.LeadRepository;
-import br.com.vendemais.repository.OpportunityRepository;
-import br.com.vendemais.repository.PipelineRepository;
-import br.com.vendemais.repository.StageRepository;
+import br.com.vendemais.repository.*;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
@@ -28,17 +25,20 @@ public class OpportunityService {
     private final LeadRepository leadRepository;
     private final PipelineRepository pipelineRepository;
     private final StageRepository stageRepository;
+    private final TaskRepository taskRepository;
 
     public OpportunityService(
             OpportunityRepository opportunityRepository,
             LeadRepository leadRepository,
             PipelineRepository pipelineRepository,
-            StageRepository stageRepository
+            StageRepository stageRepository,
+            TaskRepository taskRepository
     ) {
         this.opportunityRepository = opportunityRepository;
         this.leadRepository = leadRepository;
         this.pipelineRepository = pipelineRepository;
         this.stageRepository = stageRepository;
+        this.taskRepository = taskRepository;
     }
 
     public Page<OpportunityResponseDTO> findAll(Pageable pageable) {
@@ -155,8 +155,12 @@ public class OpportunityService {
         return stage;
     }
 
+    @Transactional
     public void delete(Long id){
         Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
+
+        taskRepository.deleteByOpportunityId(opportunity.getId());
+
         opportunityRepository.delete(opportunity);
     }
 }

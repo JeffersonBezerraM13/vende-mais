@@ -37,6 +37,7 @@ public class Opportunity {
 
     private String lossReason;
 
+    @Column(columnDefinition = "TEXT")
     private String notes;
 
     private LocalDate createdAt;

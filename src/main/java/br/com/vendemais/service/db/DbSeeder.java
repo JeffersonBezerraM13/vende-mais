@@ -38,32 +38,7 @@ public class DbSeeder {
     public void populateDb(){
         clear();
 
-        Lead lead1 = new  Lead(
-                "Ana Grey",
-                "83998765432",
-                "ana@gmail.com",
-                PersonType.INDIVIDUAL,
-                null,
-                Solution.SELF_STORAGE,
-                LeadSource.WHATSAPP,
-                EntryMethod.MANUAL,
-                "Sem observação"
-        );
-
-        Lead lead2 = new  Lead(
-                "Bob Blue",
-                "83912345678",
-                "bob@gmail.com",
-                PersonType.COMPANY,
-                "Empresa do Bob",
-                Solution.COWORKING,
-                LeadSource.PHONE_CALL,
-                EntryMethod.MANUAL,
-                "Sem observação"
-        );
-
-        leadRepository.saveAll(Arrays.asList(lead1,lead2));
-
+        // O construtor já adiciona ROLE_USER automaticamente
         User userAdmin = new User(
                 "Albert Einstein",
                 "einstein@gmail.com",
@@ -76,50 +51,106 @@ public class DbSeeder {
                 "tesla@gmail.com",
                 encoder.encode("123456")
         );
-        user1.addRole(Role.USER);
 
-        userRepository.saveAll(Arrays.asList(userAdmin,user1));
+        User user2 = new User(
+                "Marie Curie",
+                "curie@gmail.com",
+                encoder.encode("123456")
+        );
 
-        Pipeline pipeline1op1 = new Pipeline("Funíl Comercial");
+        userRepository.saveAll(Arrays.asList(userAdmin, user1, user2));
 
-        pipelineRepository.save(pipeline1op1);
+        Lead lead1 = new Lead(
+                "Ana Grey",
+                "83998765432",
+                "ana@gmail.com",
+                PersonType.INDIVIDUAL,
+                null,
+                Solution.SELF_STORAGE,
+                LeadSource.WHATSAPP,
+                EntryMethod.MANUAL,
+                null
+        );
 
-        Stage stg1 = new Stage("Novo lead", "NOVO_LEAD", 1, pipeline1op1);
-        Stage stg2 = new Stage("Contato inicial", "CONTATO_INICIAL", 2, pipeline1op1);
-        Stage stg3 = new Stage("Qualificação", "QUALIFICACAO", 3, pipeline1op1);
-        Stage stg4 = new Stage("Proposta enviada", "PROPOSTA_ENVIADA", 4, pipeline1op1);
-        Stage stg5 = new Stage("Ganho", "GANHO", 5, pipeline1op1);
+        Lead lead2 = new Lead(
+                "Bob Blue",
+                "83912345678",
+                "bob@gmail.com",
+                PersonType.COMPANY,
+                "Blue Corp",
+                Solution.COWORKING,
+                LeadSource.PHONE_CALL,
+                EntryMethod.MANUAL,
+                "O Bob ligou procurando opções de Coworking para a equipe comercial da Blue Corp. Eles operam 100% remoto hoje, mas precisam de um espaço fixo com acesso à sala de reunião para receber clientes da região presencialmente duas vezes por semana. Pediu orçamento para 4 posições."
+        );
 
-        stageRepository.saveAll(Arrays.asList(stg1,stg2,stg3,stg4,stg5));
-        pipeline1op1.addStage(stg1);
-        pipeline1op1.addStage(stg2);
-        pipeline1op1.addStage(stg3);
-        pipeline1op1.addStage(stg4);
-        pipeline1op1.addStage(stg5);
+        Lead lead3 = new Lead(
+                "Jane Green",
+                "83911112222",
+                "jane@gmail.com",
+                PersonType.COMPANY,
+                "Green Inc",
+                Solution.FISCAL_ADDRESS,
+                LeadSource.SITE,
+                EntryMethod.INTEGRATION,
+                "Lead capturado via formulário do site. A Green Inc é uma startup de São Paulo e está abrindo um CNPJ filial na Paraíba. Precisam apenas do serviço de Endereço Fiscal e Comercial para registro na junta comercial e gestão de correspondências. Informou ter urgência na contratação."
+        );
 
-        Opportunity op1lead1 = new Opportunity(
+        leadRepository.saveAll(Arrays.asList(lead1, lead2, lead3));
+
+        Pipeline pipeline1 = new Pipeline("Funil Comercial");
+        pipelineRepository.save(pipeline1);
+
+        Stage stg1 = new Stage("Novo lead", "NOVO_LEAD", 1, pipeline1);
+        Stage stg2 = new Stage("Contato inicial", "CONTATO_INICIAL", 2, pipeline1);
+        Stage stg3 = new Stage("Qualificação", "QUALIFICACAO", 3, pipeline1);
+        Stage stg4 = new Stage("Proposta enviada", "PROPOSTA_ENVIADA", 4, pipeline1);
+        Stage stg5 = new Stage("Ganho", "GANHO", 5, pipeline1);
+
+        stageRepository.saveAll(Arrays.asList(stg1, stg2, stg3, stg4, stg5));
+
+        // Ajustado para bater EXATAMENTE com os 7 parâmetros do construtor
+        Opportunity op1 = new Opportunity(
                 lead1,
-                lead1.getInterestSolution().name() +" - "+ lead1.getName(),
+                "Self Storage - Ana",
                 Solution.SELF_STORAGE,
                 new BigDecimal("1000.00"),
                 stg1,
                 LocalDate.now().plusDays(14),
-                "Sem notas"
+                null
         );
 
-        leadRepository.save(lead1);
-        opportunityRepository.save(op1lead1);
+        Opportunity op2 = new Opportunity(
+                lead2,
+                "Coworking - Bob",
+                Solution.COWORKING,
+                new BigDecimal("4500.00"),
+                stg4,
+                LocalDate.now().plusDays(15),
+                null
+        );
+
+        opportunityRepository.saveAll(Arrays.asList(op1, op2));
 
         Task task1 = new Task(
-                "Entrar em contato com cliente",
-                "Via ligação, número "+ op1lead1.getLead().getPhone(),
+                "Entrar em contato",
+                "Ligar no número " + op1.getLead().getPhone(),
                 TaskStatus.PENDING,
                 LocalDate.now().plusDays(2),
-                null,
-                op1lead1
+                null, // Lead nulo, pois está atrelado à oportunidade
+                op1
         );
 
-        taskRepository.save(task1);
+        Task task2 = new Task(
+                "Enviar contrato",
+                "Mandar por email para " + op2.getLead().getEmail(),
+                TaskStatus.PENDING,
+                LocalDate.now().plusDays(1),
+                null,
+                op2
+        );
+
+        taskRepository.saveAll(Arrays.asList(task1, task2));
     }
 
     private void clear() {
