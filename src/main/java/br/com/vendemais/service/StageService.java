@@ -1,16 +1,14 @@
 package br.com.vendemais.service;
 
-import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
 import br.com.vendemais.domain.dtos.stage.StageRequestDTO;
 import br.com.vendemais.domain.dtos.stage.StageResponseDTO;
 import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.domain.entity.Stage;
-import br.com.vendemais.domain.enums.StageType;
 import br.com.vendemais.repository.PipelineRepository;
 import br.com.vendemais.repository.StageRepository;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -61,7 +59,11 @@ public class StageService {
      * @return the persisted stage mapped to the API response DTO
      * @throws DataIntegrityViolationException if the referenced pipeline does not exist
      */
-    public StageResponseDTO createStage(StageRequestDTO dto) {
+    public StageResponseDTO createStage(@Valid StageRequestDTO dto) {
+        if (stageRepository.existsByPipelineIdAndPosition(dto.pipelineId(), dto.position())) {
+            throw new ObjectNotFoundException("Já existe uma etapa na posição " + dto.position() + " para este funil.");
+        }
+
         Pipeline pipeline = pipelineRepository.findById(dto.pipelineId())
                 .orElseThrow(() -> new DataIntegrityViolationException("Funil não encontrado"));
 
@@ -86,7 +88,7 @@ public class StageService {
      * @return the persisted stage mapped to the API response DTO
      * @throws ObjectNotFoundException if the stage does not belong to the informed pipeline
      */
-    public StageResponseDTO updateStage(Long stageId, StageRequestDTO dto) {
+    public StageResponseDTO updateStage(Long stageId,@Valid StageRequestDTO dto) {
         Stage stage = stageRepository.findByIdAndPipelineId(stageId, dto.pipelineId())
                 .orElseThrow(() -> new ObjectNotFoundException("Esse estágio não pertence a esse funil"));
 
@@ -96,6 +98,34 @@ public class StageService {
         return StageResponseDTO.daEntidade(stageRepository.save(stage));
     }
 
+    /**
+     * Deletes a specific stage, ensuring beforehand that it belongs to the informed pipeline.
+     *
+     * @param pipelineId the unique identifier of the pipeline.
+     * @param stageId the unique identifier of the stage to be deleted.
+     * @throws ObjectNotFoundException if the pipeline or the stage is not found in the database.
+     * @throws DataIntegrityViolationException if the stage is found but does not belong to the provided pipeline.
+     */
+    public void deleteStage(Long pipelineId, Long stageId) {
+        Pipeline pipeline = pipelineRepository.findById(pipelineId)
+                .orElseThrow(() -> new ObjectNotFoundException("Pipeline não encontrada"));
+
+        Stage stage = findStageById(stageId);
+
+        if(!pipeline.getId().equals(stage.getPipeline().getId())) {
+            throw new DataIntegrityViolationException("Essa etapa não pertence a esse pipeline");
+        }
+
+        stageRepository.delete(stage);
+    }
+
+    /**
+     * Helper method to retrieve a stage by its unique identifier.
+     *
+     * @param id the unique identifier of the stage.
+     * @return the {@link Stage} entity corresponding to the provided ID.
+     * @throws ObjectNotFoundException if no stage is found with the provided ID.
+     */
     private Stage findStageById(Long id) {
         return stageRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Stage não encontrado. ID: " + id));

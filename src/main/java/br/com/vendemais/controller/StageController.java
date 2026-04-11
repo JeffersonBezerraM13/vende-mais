@@ -1,10 +1,7 @@
 package br.com.vendemais.controller;
 
 import br.com.vendemais.controller.exceptions.StandardError;
-import br.com.vendemais.domain.dtos.stage.StageRequestDTO;
 import br.com.vendemais.domain.dtos.stage.StageResponseDTO;
-import br.com.vendemais.domain.entity.Pipeline;
-import br.com.vendemais.repository.PipelineRepository;
 import br.com.vendemais.service.StageService;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,8 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,9 +19,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.net.URI;
 
 
 /**

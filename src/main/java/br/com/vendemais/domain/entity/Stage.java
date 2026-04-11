@@ -1,8 +1,6 @@
 package br.com.vendemais.domain.entity;
 
-import br.com.vendemais.domain.enums.StageType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
 
@@ -10,6 +8,10 @@ import java.util.Objects;
  * Represents a single ordered checkpoint inside a sales pipeline.
  */
 @Entity
+@Table(name = "stage", uniqueConstraints = {
+        //Bloqueia posições repetidas no mesmo funil
+        @UniqueConstraint(columnNames = {"pipeline_id", "position"})
+})
 public class Stage {
 
     @Id
@@ -19,7 +21,7 @@ public class Stage {
     private String name;
     @Column(unique = true)
     private String code;
-    @Column(unique = true)
+    @Column
     private Integer position;
 
     @ManyToOne(fetch = FetchType.LAZY)

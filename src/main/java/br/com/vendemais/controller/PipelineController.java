@@ -248,4 +248,37 @@ public class PipelineController {
         pipelineService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Deletes a specific stage from a pipeline.
+     *
+     * @param pipelineId identifier of the pipeline
+     * @param stageId identifier of the stage being deleted
+     * @throws ObjectNotFoundException if the stage does not exist or does not belong to the informed pipeline
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{pipelineId}/stages/{stageId}")
+    @Operation(summary = "Deleta uma etapa de um pipeline")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Etapa deletada com sucesso (Sem conteúdo)."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Acesso negado para deletar etapas."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Etapa ou Pipeline não encontrado.",
+                    content = @Content(schema = @Schema(implementation = StandardError.class))
+            )
+    })
+    public ResponseEntity<Void> deleteStage(
+            @Parameter(description = "ID do pipeline") @PathVariable Long pipelineId,
+            @Parameter(description = "ID da etapa") @PathVariable Long stageId
+    ){
+        stageService.deleteStage(pipelineId, stageId);
+        return ResponseEntity.noContent().build();
+    }
 }
