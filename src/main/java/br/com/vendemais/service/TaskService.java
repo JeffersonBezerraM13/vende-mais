@@ -5,15 +5,18 @@ import br.com.vendemais.domain.dtos.task.TaskResponseDTO;
 import br.com.vendemais.domain.entity.Lead;
 import br.com.vendemais.domain.entity.Opportunity;
 import br.com.vendemais.domain.entity.Task;
+import br.com.vendemais.domain.entity.User;
 import br.com.vendemais.repository.LeadRepository;
 import br.com.vendemais.repository.OpportunityRepository;
 import br.com.vendemais.repository.TaskRepository;
+import br.com.vendemais.security.SecurityUtils;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -69,6 +72,7 @@ public class TaskService {
      * @return the persisted task mapped to the API response DTO
      * @throws DataIntegrityViolationException if the linked lead or opportunity is invalid or absent
      */
+    @Transactional
     public TaskResponseDTO create(TaskRequestDTO dto) {
         Lead lead = null;
         Opportunity opportunity = null;
@@ -87,7 +91,10 @@ public class TaskService {
             throw new DataIntegrityViolationException("Toda tarefa deve estar vinculada a um Lead ou a uma Oportunidade.");
         }
 
+        User user = SecurityUtils.getLoggedUser();
+
         Task task = new Task(
+                user,
                 dto.title(),
                 dto.description(),
                 dto.taskStatus(), // Ou defina como PENDING por padrão, dependendo de como você fez
@@ -109,7 +116,10 @@ public class TaskService {
      * @throws ObjectNotFoundException if the task or one of its referenced records does not exist
      * @throws DataIntegrityViolationException if the task is left without a lead or opportunity linkage
      */
+    @Transactional
     public TaskResponseDTO update(Long id, TaskRequestDTO dto) {
+        User user = SecurityUtils.getLoggedUser();
+
         Task task = findTaskById(id);
 
         Lead lead = null;
@@ -129,6 +139,7 @@ public class TaskService {
             throw new DataIntegrityViolationException("Toda tarefa deve estar vinculada a um Lead ou a uma Oportunidade.");
         }
 
+        task.setUser(user);
         task.setTitle(dto.title());
         task.setDescription(dto.description());
         if (dto.taskStatus() != null) {

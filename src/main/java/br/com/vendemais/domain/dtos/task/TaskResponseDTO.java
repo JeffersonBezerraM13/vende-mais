@@ -12,6 +12,8 @@ import java.time.LocalDate;
 public record TaskResponseDTO(
         @Schema(example = "1")
         Long id,
+        @Schema(example = "5")
+        Long userId,
         @Schema(example = "Ligar para Bob Blue")
         String title,
         @Schema(example = "Validar a urgencia da Blue Corp para contratar Coworking.")
@@ -32,6 +34,7 @@ public record TaskResponseDTO(
     public static TaskResponseDTO daEntidade(Task entidade) {
         return new TaskResponseDTO(
                 entidade.getId(),
+                entidade.getUser() != null ? entidade.getUser().getId() : null,
                 entidade.getTitle(),
                 entidade.getDescription(),
                 entidade.getStatus(),

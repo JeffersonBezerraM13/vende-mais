@@ -19,6 +19,10 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @NotBlank(message = "Uma task deve ter um nome")
     private String title;
 
@@ -27,7 +31,7 @@ public class Task {
 
     private TaskStatus taskStatus;
 
-    @NotNull(message = "Data de vencimento nÃ£o pode ser vazia")
+    @NotNull(message = "Data de vencimento não pode ser vazia")
     private LocalDate dueDate;
 
     @ManyToOne
@@ -42,7 +46,8 @@ public class Task {
 
     private LocalDate updatedAt;
 
-    public Task(String title, String description, TaskStatus taskStatus, LocalDate dueDate, Lead lead, Opportunity opportunity) {
+    public Task(User user, String title, String description, TaskStatus taskStatus, LocalDate dueDate, Lead lead, Opportunity opportunity) {
+        this.user = user;
         this.title = title;
         this.description = description;
         this.taskStatus = taskStatus;
@@ -56,6 +61,14 @@ public class Task {
 
     public Long getId() {
         return id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getTitle() {
