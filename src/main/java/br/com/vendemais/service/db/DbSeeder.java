@@ -105,9 +105,8 @@ public class DbSeeder {
         Stage stg2 = new Stage("Contato inicial", "CONTATO_INICIAL", 2, pipeline1);
         Stage stg3 = new Stage("Qualificação", "QUALIFICACAO", 3, pipeline1);
         Stage stg4 = new Stage("Proposta enviada", "PROPOSTA_ENVIADA", 4, pipeline1);
-        Stage stg5 = new Stage("Ganho", "GANHO", 5, pipeline1);
 
-        stageRepository.saveAll(Arrays.asList(stg1, stg2, stg3, stg4, stg5));
+        stageRepository.saveAll(Arrays.asList(stg1, stg2, stg3, stg4));
 
         // Ajustado para bater EXATAMENTE com os 7 parâmetros do construtor
         Opportunity op1 = new Opportunity(
@@ -133,6 +132,7 @@ public class DbSeeder {
         opportunityRepository.saveAll(Arrays.asList(op1, op2));
 
         Task task1 = new Task(
+                userAdmin,
                 "Entrar em contato",
                 "Ligar no número " + op1.getLead().getPhone(),
                 TaskStatus.PENDING,
@@ -142,6 +142,7 @@ public class DbSeeder {
         );
 
         Task task2 = new Task(
+                userAdmin,
                 "Enviar contrato",
                 "Mandar por email para " + op2.getLead().getEmail(),
                 TaskStatus.PENDING,
@@ -150,7 +151,27 @@ public class DbSeeder {
                 op2
         );
 
-        taskRepository.saveAll(Arrays.asList(task1, task2));
+        Task task3 = new Task(
+                user1,
+                "Qualificação de Lead",
+                "Realizar a primeira chamada para entender a dor do cliente: " + lead1.getName(),
+                TaskStatus.PENDING,
+                LocalDate.now().plusDays(3),
+                lead1,
+                null // Oportunidade nula, pois ainda é um lead frio
+        );
+
+        Task task4 = new Task(
+                user1,
+                "Reunião de Demonstração",
+                "Apresentar o dashboard do VendeMais para os tomadores de decisão da " + op2.getLead().getCompanyName(),
+                TaskStatus.PENDING,
+                LocalDate.now().plusDays(5),
+                null, // Lead nulo, pois já virou uma oportunidade
+                op2
+        );
+
+        taskRepository.saveAll(Arrays.asList(task1, task2, task3, task4));
     }
 
     private void clear() {
