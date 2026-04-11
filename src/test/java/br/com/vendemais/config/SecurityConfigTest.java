@@ -20,7 +20,7 @@ class SecurityConfigTest {
         CorsConfiguration configuration = source.getCorsConfiguration(new MockHttpServletRequest());
 
         assertNotNull(configuration);
-        assertEquals(java.util.List.of("POST", "GET", "PUT", "DELETE", "OPTIONS"), configuration.getAllowedMethods());
+        assertEquals(java.util.List.of("POST", "GET", "PUT","PATCH","DELETE", "OPTIONS"), configuration.getAllowedMethods());
         assertFalse(Boolean.TRUE.equals(configuration.getAllowCredentials()));
     }
 }
