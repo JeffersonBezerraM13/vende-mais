@@ -24,6 +24,7 @@ public record LeadRequestDTO(
         @Schema(example = "bob@gmail.com")
         String email,
 
+        @NotNull(message = "Tipo de pessoa é obrigatório")
         @Schema(example = "COMPANY")
         PersonType personType,
         @Schema(example = "Blue Corp")

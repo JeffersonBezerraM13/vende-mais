@@ -31,6 +31,7 @@ public class Lead {
     @Email
     private String email;
 
+    @NotNull(message = "Tipo de pessoa é obrigatório")
     private PersonType personType;
 
     private String companyName;
