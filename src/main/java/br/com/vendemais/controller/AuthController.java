@@ -3,7 +3,7 @@ package br.com.vendemais.controller;
 import br.com.vendemais.domain.dtos.user.UserResponseDTO;
 import br.com.vendemais.domain.entity.User;
 import br.com.vendemais.repository.UserRepository;
-import br.com.vendemais.security.UsuarioSecurity;
+import br.com.vendemais.security.UserSecurity;
 import br.com.vendemais.controller.exceptions.StandardError;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +51,7 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
-    public ResponseEntity<UserResponseDTO> getMe(@AuthenticationPrincipal UsuarioSecurity loggedUser) {
+    public ResponseEntity<UserResponseDTO> getMe(@AuthenticationPrincipal UserSecurity loggedUser) {
         User user = userRepository.findById(loggedUser.getId())
                 .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado."));
 

@@ -1,7 +1,7 @@
 package br.com.vendemais.domain.entity;
 
 import br.com.vendemais.domain.enums.Role;
-import br.com.vendemais.security.UsuarioSecurity;
+import br.com.vendemais.security.UserSecurity;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -34,11 +34,11 @@ class UserTest {
         user.addRole(Role.ADMIN);
         ReflectionTestUtils.setField(user, "id", 7L);
 
-        UsuarioSecurity usuarioSecurity = new UsuarioSecurity(user);
+        UserSecurity userSecurity = new UserSecurity(user);
 
-        assertEquals(7L, usuarioSecurity.getId());
-        assertEquals("einstein@gmail.com", usuarioSecurity.getUsername());
-        assertTrue(usuarioSecurity.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")));
-        assertTrue(usuarioSecurity.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        assertEquals(7L, userSecurity.getId());
+        assertEquals("einstein@gmail.com", userSecurity.getUsername());
+        assertTrue(userSecurity.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")));
+        assertTrue(userSecurity.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
     }
 }

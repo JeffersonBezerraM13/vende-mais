@@ -34,6 +34,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + email));
 
         // Retornamos o nosso Wrapper que implementa UserDetails
-        return new UsuarioSecurity(user);
+        return new UserSecurity(user);
     }
 }

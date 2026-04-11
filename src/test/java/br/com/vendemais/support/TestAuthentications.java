@@ -1,13 +1,17 @@
 package br.com.vendemais.support;
 
+import br.com.vendemais.domain.entity.User;
 import br.com.vendemais.domain.enums.Role;
-import br.com.vendemais.security.UsuarioSecurity;
+import br.com.vendemais.security.UserSecurity;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 
@@ -29,11 +33,20 @@ public final class TestAuthentications {
     }
 
     public static Authentication authenticatedUser(Long id, String email, Role... roles) {
-        UsuarioSecurity principal = new UsuarioSecurity(
+        User userEntity = BeanUtils.instantiateClass(User.class);
+
+        Set<Role> rolesSet = new LinkedHashSet<>(Arrays.asList(roles));
+
+        ReflectionTestUtils.setField(userEntity, "id", id);
+        ReflectionTestUtils.setField(userEntity, "email", email);
+        ReflectionTestUtils.setField(userEntity, "roles", rolesSet);
+
+        UserSecurity principal = new UserSecurity(
                 id,
                 email,
                 "encoded-password",
-                new LinkedHashSet<>(Arrays.asList(roles))
+                rolesSet,
+                userEntity // Agora com a entidade recheada!
         );
 
         return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
