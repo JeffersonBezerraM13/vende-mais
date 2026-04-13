@@ -110,7 +110,17 @@ public class DbSeeder {
 
         stageRepository.saveAll(Arrays.asList(stg1, stg2, stg3, stg4));
 
-        // Ajustado para bater EXATAMENTE com os 7 parâmetros do construtor
+        Pipeline pipelineCoworking = new Pipeline("Locação de Espaços (Coworking)");
+        pipelineRepository.save(pipelineCoworking);
+
+        Stage stgv1 = new Stage("Contato Inicial", "CONTATO_INICIAL", 1, pipelineCoworking);
+        Stage stgv2 = new Stage("Visita Agendada (Tour)", "VISITA_AGENDADA", 2, pipelineCoworking);
+        Stage stgv3 = new Stage("Visita Realizada", "VISITA_REALIZADA", 3, pipelineCoworking);
+        Stage stgv4 = new Stage("Proposta Enviada", "PROPOSTA_ENVIADA", 4, pipelineCoworking);
+        Stage stgv5 = new Stage("Revisão de Contrato", "REVISAO_CONTRATO", 5, pipelineCoworking);
+
+        stageRepository.saveAll(Arrays.asList(stgv1, stgv2, stgv3, stgv4, stgv5));
+
         Opportunity op1 = new Opportunity(
                 lead1,
                 "Self Storage - Ana",
@@ -139,7 +149,7 @@ public class DbSeeder {
                 "Ligar no número " + op1.getLead().getPhone(),
                 TaskStatus.PENDING,
                 LocalDate.now().plusDays(2),
-                null, // Lead nulo, pois está atrelado à oportunidade
+                null,
                 op1
         );
 
@@ -160,7 +170,7 @@ public class DbSeeder {
                 TaskStatus.PENDING,
                 LocalDate.now().plusDays(3),
                 lead1,
-                null // Oportunidade nula, pois ainda é um lead frio
+                null
         );
 
         Task task4 = new Task(
@@ -169,7 +179,7 @@ public class DbSeeder {
                 "Apresentar o dashboard do VendeMais para os tomadores de decisão da " + op2.getLead().getCompanyName(),
                 TaskStatus.PENDING,
                 LocalDate.now().plusDays(5),
-                null, // Lead nulo, pois já virou uma oportunidade
+                null,
                 op2
         );
 
