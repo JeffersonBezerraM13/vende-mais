@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Handles stage catalog operations inside pipelines so opportunity movement
@@ -59,24 +60,30 @@ public class StageService {
      * @return the persisted stage mapped to the API response DTO
      * @throws DataIntegrityViolationException if the referenced pipeline does not exist
      */
+    @Transactional
     public StageResponseDTO createStage(@Valid StageRequestDTO dto) {
-        if (stageRepository.existsByPipelineIdAndPosition(dto.pipelineId(), dto.position())) {
-            throw new ObjectNotFoundException("Já existe uma etapa na posição " + dto.position() + " para este funil.");
+        try{
+            if (stageRepository.existsByPipelineIdAndPosition(dto.pipelineId(), dto.position())) {
+                throw new ObjectNotFoundException("Já existe uma etapa na posição " + dto.position() + " para este funil.");
+            }
+
+            Pipeline pipeline = pipelineRepository.findById(dto.pipelineId())
+                    .orElseThrow(() -> new DataIntegrityViolationException("Funil não encontrado."));
+
+            Stage stage = new Stage(
+                    dto.name(),
+                    dto.code(),
+                    dto.position(),
+                    pipeline
+            );
+
+            pipeline.addStage(stage);
+
+            return StageResponseDTO.daEntidade(stageRepository.save(stage));
+        } catch (org.springframework.dao.DataIntegrityViolationException e){
+            throw new DataIntegrityViolationException("O código das etapas deve ser único globalmente.");
         }
 
-        Pipeline pipeline = pipelineRepository.findById(dto.pipelineId())
-                .orElseThrow(() -> new DataIntegrityViolationException("Funil não encontrado"));
-
-        Stage stage = new Stage(
-                dto.name(),
-                dto.code(),
-                dto.position(),
-                pipeline
-        );
-
-        pipeline.addStage(stage);
-
-        return StageResponseDTO.daEntidade(stageRepository.save(stage));
     }
 
     /**
