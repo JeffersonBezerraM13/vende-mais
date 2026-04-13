@@ -6,6 +6,7 @@ import br.com.vendemais.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,6 +36,7 @@ public class DbSeeder {
     @Autowired
     private BCryptPasswordEncoder encoder;
 
+    @Transactional
     public void populateDb(){
         clear();
 

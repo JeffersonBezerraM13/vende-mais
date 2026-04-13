@@ -10,6 +10,7 @@ import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -18,6 +19,7 @@ import java.time.LocalDate;
  * CRM.
  */
 @Service
+@Transactional(readOnly = true)
 public class LeadService {
 
     private final LeadRepository leadRepository;
@@ -60,6 +62,7 @@ public class LeadService {
      * @return the persisted lead mapped to the API response DTO
      * @throws DataIntegrityViolationException if another lead already uses the same email
      */
+    @Transactional
     public LeadResponseDTO create(LeadRequestDTO dto) {
         if(existsByEmail(dto.email())){
             throw new DataIntegrityViolationException("Lead já está cadastrado no sistema");
@@ -89,6 +92,7 @@ public class LeadService {
      * @return the persisted lead mapped to the API response DTO
      * @throws ObjectNotFoundException if the lead does not exist
      */
+    @Transactional
     public LeadResponseDTO update(Long id, LeadRequestDTO dto) {
         Lead lead = findLeadById(id);
 
@@ -113,6 +117,7 @@ public class LeadService {
      * @param id identifier of the lead to delete
      * @throws ObjectNotFoundException if the lead does not exist
      */
+    @Transactional
     public void delete(Long id){
         Lead lead = findLeadById(id);
         leadRepository.delete(lead);

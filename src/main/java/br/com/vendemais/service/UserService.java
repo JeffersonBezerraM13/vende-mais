@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
  * validation.
  */
 @Service
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository UserRepository;
@@ -62,6 +64,7 @@ public class UserService {
      * @return the persisted user mapped to the API response DTO
      * @throws DataIntegrityViolationException if another account already uses the same email
      */
+    @Transactional
     public UserResponseDTO create(UserRequestDTO dto) {
         if(existsByEmail(dto.email())){
             throw new DataIntegrityViolationException("User já está cadastrado no sistema");
@@ -85,6 +88,7 @@ public class UserService {
      * @return the persisted user mapped to the API response DTO
      * @throws ObjectNotFoundException if the user does not exist
      */
+    @Transactional
     public UserResponseDTO update(Long id, UserRequestDTO dto) {
         User user = findUserById(id);
 
@@ -100,6 +104,7 @@ public class UserService {
      * @param id identifier of the user to delete
      * @throws ObjectNotFoundException if the user does not exist
      */
+    @Transactional
     public void delete(Long id){
         User user = findUserById(id);
         UserRepository.delete(user);

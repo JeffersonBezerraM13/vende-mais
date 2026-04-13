@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  * follows a defined ordering.
  */
 @Service
+@Transactional(readOnly = true)
 public class StageService {
 
     private final StageRepository stageRepository;
@@ -95,6 +96,7 @@ public class StageService {
      * @return the persisted stage mapped to the API response DTO
      * @throws ObjectNotFoundException if the stage does not belong to the informed pipeline
      */
+    @Transactional
     public StageResponseDTO updateStage(Long stageId,@Valid StageRequestDTO dto) {
         Stage stage = stageRepository.findByIdAndPipelineId(stageId, dto.pipelineId())
                 .orElseThrow(() -> new ObjectNotFoundException("Esse estágio não pertence a esse funil"));
@@ -113,6 +115,7 @@ public class StageService {
      * @throws ObjectNotFoundException if the pipeline or the stage is not found in the database.
      * @throws DataIntegrityViolationException if the stage is found but does not belong to the provided pipeline.
      */
+    @Transactional
     public void deleteStage(Long pipelineId, Long stageId) {
         Pipeline pipeline = pipelineRepository.findById(pipelineId)
                 .orElseThrow(() -> new ObjectNotFoundException("Pipeline não encontrada"));

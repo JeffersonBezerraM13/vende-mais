@@ -23,6 +23,7 @@ import java.util.Optional;
  * validation, and win/loss closing logic.
  */
 @Service
+@Transactional(readOnly = true)
 public class OpportunityService {
 
     private final OpportunityRepository opportunityRepository;

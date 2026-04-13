@@ -9,12 +9,14 @@ import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Manages sales pipeline definitions that determine how opportunities are
  * organized inside the CRM.
  */
 @Service
+@Transactional(readOnly = true)
 public class PipelineService {
 
     private final PipelineRepository pipelineRepository;
@@ -56,6 +58,7 @@ public class PipelineService {
      * @return the persisted pipeline mapped to the API response DTO
      * @throws DataIntegrityViolationException if another pipeline already uses the same title
      */
+    @Transactional
     public PipelineResponseDTO create(PipelineRequestDTO dto) {
         if(existsbyTitle(dto.title())){
             throw new DataIntegrityViolationException("Pipeline já está cadastrado no sistema");
@@ -76,6 +79,7 @@ public class PipelineService {
      * @return the persisted pipeline mapped to the API response DTO
      * @throws ObjectNotFoundException if the pipeline does not exist
      */
+    @Transactional
     public PipelineResponseDTO update(Long id, PipelineRequestDTO dto) {
         Pipeline pipeline = findPipelineById(id);
 
@@ -92,6 +96,7 @@ public class PipelineService {
      * @throws ObjectNotFoundException if the pipeline does not exist
      * @throws DataIntegrityViolationException if the pipeline is still referenced by related records
      */
+    @Transactional
     public void delete(Long id){
         Pipeline pipeline = findPipelineById(id);
         try{

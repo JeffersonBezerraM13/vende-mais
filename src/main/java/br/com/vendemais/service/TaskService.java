@@ -25,6 +25,7 @@ import java.time.LocalDate;
  * aligned with the sales process.
  */
 @Service
+@Transactional(readOnly = true)
 public class TaskService {
 
     private final TaskRepository taskRepository;
@@ -159,6 +160,7 @@ public class TaskService {
      * @param id identifier of the task to delete
      * @throws ObjectNotFoundException if the task does not exist
      */
+    @Transactional
     public void delete(Long id){
         Task task = findTaskById(id);
         taskRepository.delete(task);
