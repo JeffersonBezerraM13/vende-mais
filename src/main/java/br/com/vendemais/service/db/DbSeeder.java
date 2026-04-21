@@ -103,21 +103,21 @@ public class DbSeeder {
         Pipeline pipeline1 = new Pipeline("Funil Comercial");
         pipelineRepository.save(pipeline1);
 
-        Stage stg1 = new Stage("Novo lead", "NOVO_LEAD", 1, pipeline1);
-        Stage stg2 = new Stage("Contato inicial", "CONTATO_INICIAL", 2, pipeline1);
-        Stage stg3 = new Stage("Qualificação", "QUALIFICACAO", 3, pipeline1);
-        Stage stg4 = new Stage("Proposta enviada", "PROPOSTA_ENVIADA", 4, pipeline1);
+        Stage stg1 = new Stage("Novo lead", "NOVO_LEAD_1", 1, pipeline1);
+        Stage stg2 = new Stage("Contato inicial", "CONTATO_INICIAL_1", 2, pipeline1);
+        Stage stg3 = new Stage("Qualificação", "QUALIFICACAO_1", 3, pipeline1);
+        Stage stg4 = new Stage("Proposta enviada", "PROPOSTA_ENVIADA_1", 4, pipeline1);
 
         stageRepository.saveAll(Arrays.asList(stg1, stg2, stg3, stg4));
 
         Pipeline pipelineCoworking = new Pipeline("Locação de Espaços (Coworking)");
         pipelineRepository.save(pipelineCoworking);
 
-        Stage stgv1 = new Stage("Contato Inicial", "CONTATO_INICIAL", 1, pipelineCoworking);
-        Stage stgv2 = new Stage("Visita Agendada (Tour)", "VISITA_AGENDADA", 2, pipelineCoworking);
-        Stage stgv3 = new Stage("Visita Realizada", "VISITA_REALIZADA", 3, pipelineCoworking);
-        Stage stgv4 = new Stage("Proposta Enviada", "PROPOSTA_ENVIADA", 4, pipelineCoworking);
-        Stage stgv5 = new Stage("Revisão de Contrato", "REVISAO_CONTRATO", 5, pipelineCoworking);
+        Stage stgv1 = new Stage("Contato Inicial", "CONTATO_INICIAL_2", 1, pipelineCoworking);
+        Stage stgv2 = new Stage("Visita Agendada (Tour)", "VISITA_AGENDADA_2", 2, pipelineCoworking);
+        Stage stgv3 = new Stage("Visita Realizada", "VISITA_REALIZADA_2", 3, pipelineCoworking);
+        Stage stgv4 = new Stage("Proposta Enviada", "PROPOSTA_ENVIADA_2", 4, pipelineCoworking);
+        Stage stgv5 = new Stage("Revisão de Contrato", "REVISAO_CONTRATO_2", 5, pipelineCoworking);
 
         stageRepository.saveAll(Arrays.asList(stgv1, stgv2, stgv3, stgv4, stgv5));
 
