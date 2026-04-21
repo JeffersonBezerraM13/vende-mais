@@ -1,6 +1,7 @@
 package br.com.vendemais.security;
 
 
+import br.com.vendemais.controller.exceptions.StandardError;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -82,26 +83,20 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed)
-            throws IOException, ServletException {
+            throws IOException {
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-        response.setContentType("application/json");
-        response.getWriter().write(buildJsonError());
-    }
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
 
-    /**
-     * Builds the JSON body returned when authentication fails.
-     *
-     * @return JSON representation of the unauthorized error contract
-     */
-    private String buildJsonError() {
-        long timestamp = new Date().getTime();
-        return "{"
-                + "\"timestamp\": " + timestamp + ","
-                + "\"status\": 401,"
-                + "\"error\": \"NÃ£o autorizado\","
-                + "\"message\": \"Email ou senha invÃ¡lidos\","
-                + "\"path\": \"/login\""
-                + "}";
+        StandardError error = new StandardError(
+                System.currentTimeMillis(),
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Não autorizado",
+                "Email ou senha inválidos",
+                request.getRequestURI()
+        );
+
+        new ObjectMapper().writeValue(response.getWriter(), error);
     }
 }
