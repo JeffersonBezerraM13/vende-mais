@@ -1,66 +1,69 @@
 package br.com.vendemais.service.db;
 
-import br.com.vendemais.domain.entity.*;
-import br.com.vendemais.domain.enums.*;
-import br.com.vendemais.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import br.com.vendemais.domain.entity.Lead;
+import br.com.vendemais.domain.entity.Opportunity;
+import br.com.vendemais.domain.entity.Pipeline;
+import br.com.vendemais.domain.entity.Stage;
+import br.com.vendemais.domain.entity.Task;
+import br.com.vendemais.domain.entity.User;
+import br.com.vendemais.domain.enums.EntryMethod;
+import br.com.vendemais.domain.enums.LeadSource;
+import br.com.vendemais.domain.enums.PersonType;
+import br.com.vendemais.domain.enums.Role;
+import br.com.vendemais.domain.enums.Solution;
+import br.com.vendemais.domain.enums.TaskStatus;
+import br.com.vendemais.repository.LeadRepository;
+import br.com.vendemais.repository.OpportunityRepository;
+import br.com.vendemais.repository.PipelineRepository;
+import br.com.vendemais.repository.StageRepository;
+import br.com.vendemais.repository.TaskRepository;
+import br.com.vendemais.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class DbSeeder {
 
-    @Autowired
-    private LeadRepository leadRepository;
+    private final LeadRepository leadRepository;
+    private final UserRepository userRepository;
+    private final PipelineRepository pipelineRepository;
+    private final StageRepository stageRepository;
+    private final OpportunityRepository opportunityRepository;
+    private final TaskRepository taskRepository;
+    private final BCryptPasswordEncoder encoder;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PipelineRepository pipelineRepository;
-
-    @Autowired
-    private StageRepository stageRepository;
-
-    @Autowired
-    private OpportunityRepository opportunityRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder encoder;
+    public DbSeeder(
+            LeadRepository leadRepository,
+            UserRepository userRepository,
+            PipelineRepository pipelineRepository,
+            StageRepository stageRepository,
+            OpportunityRepository opportunityRepository,
+            TaskRepository taskRepository,
+            BCryptPasswordEncoder encoder
+    ) {
+        this.leadRepository = leadRepository;
+        this.userRepository = userRepository;
+        this.pipelineRepository = pipelineRepository;
+        this.stageRepository = stageRepository;
+        this.opportunityRepository = opportunityRepository;
+        this.taskRepository = taskRepository;
+        this.encoder = encoder;
+    }
 
     @Transactional
-    public void populateDb(){
+    public void populateDb() {
         clear();
 
-        // O construtor já adiciona ROLE_USER automaticamente
-        User userAdmin = new User(
-                "Albert Einstein",
-                "einstein@gmail.com",
-                encoder.encode("123456")
-        );
-        userAdmin.addRole(Role.ADMIN);
+        User userAdmin = createAdminUser();
+        User user1 = createUser("Nikola Tesla", "tesla@gmail.com");
+        User user2 = createUser("Marie Curie", "curie@gmail.com");
 
-        User user1 = new User(
-                "Nikola Tesla",
-                "tesla@gmail.com",
-                encoder.encode("123456")
-        );
-
-        User user2 = new User(
-                "Marie Curie",
-                "curie@gmail.com",
-                encoder.encode("123456")
-        );
-
-        userRepository.saveAll(Arrays.asList(userAdmin, user1, user2));
+        userRepository.saveAll(List.of(userAdmin, user1, user2));
 
         Lead lead1 = new Lead(
                 "Ana Grey",
@@ -71,7 +74,7 @@ public class DbSeeder {
                 Solution.SELF_STORAGE,
                 LeadSource.WHATSAPP,
                 EntryMethod.MANUAL,
-                null
+                "Lead entrou em contato via WhatsApp buscando orçamento para Self Storage."
         );
 
         Lead lead2 = new Lead(
@@ -83,7 +86,7 @@ public class DbSeeder {
                 Solution.COWORKING,
                 LeadSource.PHONE_CALL,
                 EntryMethod.MANUAL,
-                "O Bob ligou procurando opções de Coworking para a equipe comercial da Blue Corp. Eles operam 100% remoto hoje, mas precisam de um espaço fixo com acesso à sala de reunião para receber clientes da região presencialmente duas vezes por semana. Pediu orçamento para 4 posições."
+                "O Bob ligou procurando opções de Coworking para a equipe comercial da Blue Corp. Eles operam 100% remoto hoje, mas precisam de um espaço fixo com acesso à sala de reunião para receber clientes presencialmente duas vezes por semana. Pediu orçamento para 4 posições."
         );
 
         Lead lead3 = new Lead(
@@ -95,103 +98,209 @@ public class DbSeeder {
                 Solution.FISCAL_ADDRESS,
                 LeadSource.SITE,
                 EntryMethod.INTEGRATION,
-                "Lead capturado via formulário do site. A Green Inc é uma startup de São Paulo e está abrindo um CNPJ filial na Paraíba. Precisam apenas do serviço de Endereço Fiscal e Comercial para registro na junta comercial e gestão de correspondências. Informou ter urgência na contratação."
+                "Lead capturado via formulário do site. A Green Inc é uma startup de São Paulo e está abrindo um CNPJ filial na Paraíba. Precisam do serviço de Endereço Fiscal e Comercial para registro na junta comercial e gestão de correspondências."
         );
 
-        leadRepository.saveAll(Arrays.asList(lead1, lead2, lead3));
+        Lead lead4 = new Lead(
+                "Carlos Orange",
+                "83922223333",
+                "carlos@gmail.com",
+                PersonType.COMPANY,
+                "Orange Tech",
+                Solution.COMMERCIAL_ADDRESS,
+                LeadSource.REFERRAL,
+                EntryMethod.MANUAL,
+                "Lead indicado por cliente ativo. Demonstrou interesse em endereço comercial, mas ainda está comparando fornecedores."
+        );
 
-        Pipeline pipeline1 = new Pipeline("Funil Comercial");
-        pipelineRepository.save(pipeline1);
+        Lead lead5 = new Lead(
+                "Marina Marketing",
+                "83933334444",
+                "marina.marketing@example.com",
+                PersonType.INDIVIDUAL,
+                null,
+                Solution.NOT_SPECIFIED,
+                LeadSource.MARKETING_INTEGRATION,
+                EntryMethod.INTEGRATION,
+                "Lead importado automaticamente por integração externa de marketing. A solução de interesse ainda não foi qualificada pelo time comercial."
+        );
 
-        Stage stg1 = new Stage("Novo lead", "NOVO_LEAD_1", 1, pipeline1);
-        Stage stg2 = new Stage("Contato inicial", "CONTATO_INICIAL_1", 2, pipeline1);
-        Stage stg3 = new Stage("Qualificação", "QUALIFICACAO_1", 3, pipeline1);
-        Stage stg4 = new Stage("Proposta enviada", "PROPOSTA_ENVIADA_1", 4, pipeline1);
+        leadRepository.saveAll(List.of(lead1, lead2, lead3, lead4, lead5));
 
-        stageRepository.saveAll(Arrays.asList(stg1, stg2, stg3, stg4));
+        Pipeline commercialPipeline = new Pipeline("Funil Comercial");
+        Pipeline coworkingPipeline = new Pipeline("Locação de Espaços (Coworking)");
 
-        Pipeline pipelineCoworking = new Pipeline("Locação de Espaços (Coworking)");
-        pipelineRepository.save(pipelineCoworking);
+        pipelineRepository.saveAll(List.of(commercialPipeline, coworkingPipeline));
 
-        Stage stgv1 = new Stage("Contato Inicial", "CONTATO_INICIAL_2", 1, pipelineCoworking);
-        Stage stgv2 = new Stage("Visita Agendada (Tour)", "VISITA_AGENDADA_2", 2, pipelineCoworking);
-        Stage stgv3 = new Stage("Visita Realizada", "VISITA_REALIZADA_2", 3, pipelineCoworking);
-        Stage stgv4 = new Stage("Proposta Enviada", "PROPOSTA_ENVIADA_2", 4, pipelineCoworking);
-        Stage stgv5 = new Stage("Revisão de Contrato", "REVISAO_CONTRATO_2", 5, pipelineCoworking);
+        Stage commercialNewLead = createStage(commercialPipeline, "Novo lead", "NOVO_LEAD", 1);
+        Stage commercialInitialContact = createStage(commercialPipeline, "Contato inicial", "CONTATO_INICIAL", 2);
+        Stage commercialQualification = createStage(commercialPipeline, "Qualificação", "QUALIFICACAO", 3);
+        Stage commercialProposalSent = createStage(commercialPipeline, "Proposta enviada", "PROPOSTA_ENVIADA", 4);
 
-        stageRepository.saveAll(Arrays.asList(stgv1, stgv2, stgv3, stgv4, stgv5));
+        Stage coworkingInitialContact = createStage(coworkingPipeline, "Contato inicial", "CONTATO_INICIAL", 1);
+        Stage coworkingTourScheduled = createStage(coworkingPipeline, "Visita agendada (Tour)", "VISITA_AGENDADA", 2);
+        Stage coworkingTourDone = createStage(coworkingPipeline, "Visita realizada", "VISITA_REALIZADA", 3);
+        Stage coworkingProposalSent = createStage(coworkingPipeline, "Proposta enviada", "PROPOSTA_ENVIADA", 4);
+        Stage coworkingContractReview = createStage(coworkingPipeline, "Revisão de contrato", "REVISAO_CONTRATO", 5);
 
-        Opportunity op1 = new Opportunity(
+        stageRepository.saveAll(List.of(
+                commercialNewLead,
+                commercialInitialContact,
+                commercialQualification,
+                commercialProposalSent,
+                coworkingInitialContact,
+                coworkingTourScheduled,
+                coworkingTourDone,
+                coworkingProposalSent,
+                coworkingContractReview
+        ));
+
+        Opportunity openOpportunity1 = new Opportunity(
                 lead1,
                 "Self Storage - Ana",
                 Solution.SELF_STORAGE,
                 new BigDecimal("1000.00"),
-                stg1,
+                commercialNewLead,
                 LocalDate.now().plusDays(14),
-                null
+                "Oportunidade aberta para contratação de Self Storage."
         );
 
-        Opportunity op2 = new Opportunity(
+        Opportunity openOpportunity2 = new Opportunity(
                 lead2,
                 "Coworking - Bob",
                 Solution.COWORKING,
                 new BigDecimal("4500.00"),
-                stg4,
+                coworkingProposalSent,
                 LocalDate.now().plusDays(15),
-                null
+                "Oportunidade em negociação para locação de 4 posições de coworking."
         );
 
-        opportunityRepository.saveAll(Arrays.asList(op1, op2));
+        Opportunity wonOpportunity = new Opportunity(
+                lead3,
+                "Endereço Fiscal - Jane",
+                Solution.FISCAL_ADDRESS,
+                new BigDecimal("800.00"),
+                commercialProposalSent,
+                LocalDate.now().plusDays(7),
+                "Oportunidade fechada como ganha para contratação de endereço fiscal."
+        );
+        wonOpportunity.setWon(true);
+        wonOpportunity.setClosedAt(LocalDate.now().minusDays(1));
+
+        Opportunity lostOpportunity = new Opportunity(
+                lead4,
+                "Endereço Comercial - Carlos",
+                Solution.COMMERCIAL_ADDRESS,
+                new BigDecimal("1200.00"),
+                commercialQualification,
+                LocalDate.now().plusDays(10),
+                "Oportunidade encerrada após comparação com outro fornecedor."
+        );
+        lostOpportunity.setWon(false);
+        lostOpportunity.setClosedAt(LocalDate.now().minusDays(2));
+        lostOpportunity.setLossReason("Cliente optou por fornecedor concorrente com menor preço.");
+
+        opportunityRepository.saveAll(List.of(
+                openOpportunity1,
+                openOpportunity2,
+                wonOpportunity,
+                lostOpportunity
+        ));
 
         Task task1 = new Task(
                 userAdmin,
                 "Entrar em contato",
-                "Ligar no número " + op1.getLead().getPhone(),
+                "Ligar no número " + openOpportunity1.getLead().getPhone(),
                 TaskStatus.PENDING,
                 LocalDate.now().plusDays(2),
                 null,
-                op1
+                openOpportunity1
         );
 
         Task task2 = new Task(
                 userAdmin,
                 "Enviar contrato",
-                "Mandar por email para " + op2.getLead().getEmail(),
+                "Mandar contrato por e-mail para " + openOpportunity2.getLead().getEmail(),
                 TaskStatus.PENDING,
                 LocalDate.now().plusDays(1),
                 null,
-                op2
+                openOpportunity2
         );
 
         Task task3 = new Task(
                 user1,
-                "Qualificação de Lead",
-                "Realizar a primeira chamada para entender a dor do cliente: " + lead1.getName(),
+                "Qualificação de lead",
+                "Realizar a primeira chamada para entender a dor do cliente: " + lead5.getName(),
                 TaskStatus.PENDING,
                 LocalDate.now().plusDays(3),
-                lead1,
+                lead5,
                 null
         );
 
         Task task4 = new Task(
                 user1,
-                "Reunião de Demonstração",
-                "Apresentar o dashboard do VendeMais para os tomadores de decisão da " + op2.getLead().getCompanyName(),
+                "Registrar perda da negociação",
+                "Conferir se o motivo de perda da oportunidade foi registrado corretamente.",
+                TaskStatus.COMPLETED,
+                LocalDate.now().minusDays(1),
+                null,
+                lostOpportunity
+        );
+
+        Task task5 = new Task(
+                user2,
+                "Follow-up pós-venda",
+                "Entrar em contato com " + wonOpportunity.getLead().getCompanyName() + " para validar onboarding.",
                 TaskStatus.PENDING,
                 LocalDate.now().plusDays(5),
                 null,
-                op2
+                wonOpportunity
         );
 
-        taskRepository.saveAll(Arrays.asList(task1, task2, task3, task4));
+        taskRepository.saveAll(List.of(task1, task2, task3, task4, task5));
+    }
+
+    private User createAdminUser() {
+        User userAdmin = new User(
+                "Albert Einstein",
+                "einstein@gmail.com",
+                encoder.encode("123456")
+        );
+        userAdmin.addRole(Role.ADMIN);
+        return userAdmin;
+    }
+
+    private User createUser(String name, String email) {
+        return new User(
+                name,
+                email,
+                encoder.encode("123456")
+        );
+    }
+
+    private Stage createStage(Pipeline pipeline, String name, String code, Integer position) {
+        Stage stage = new Stage(name, code, position, pipeline);
+        pipeline.addStage(stage);
+        return stage;
     }
 
     private void clear() {
-        leadRepository.deleteAll();
-        userRepository.deleteAll();
-        opportunityRepository.deleteAll();
         taskRepository.deleteAll();
-        pipelineRepository.deleteAll();
+        taskRepository.flush();
+
+        opportunityRepository.deleteAll();
+        opportunityRepository.flush();
+
         stageRepository.deleteAll();
+        stageRepository.flush();
+
+        pipelineRepository.deleteAll();
+        pipelineRepository.flush();
+
+        leadRepository.deleteAll();
+        leadRepository.flush();
+
+        userRepository.deleteAll();
+        userRepository.flush();
     }
 }
