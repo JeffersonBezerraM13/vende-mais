@@ -4,7 +4,7 @@ import br.com.vendemais.domain.dtos.opportunity.OpportunityRequestDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityResponseDTO;
 import br.com.vendemais.domain.enums.Solution;
 import br.com.vendemais.service.OpportunityService;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.service.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,7 +94,7 @@ class OpportunityControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void createShouldReturn400WhenServiceRejectsRequest() throws Exception {
+    void createShouldReturn422WhenServiceRejectsRequest() throws Exception {
         OpportunityRequestDTO request = new OpportunityRequestDTO(
                 1L,
                 "Nova oportunidade",
@@ -107,13 +107,13 @@ class OpportunityControllerTest extends ControllerTestSupport {
         );
 
         when(opportunityService.create(any(OpportunityRequestDTO.class)))
-                .thenThrow(new DataIntegrityViolationException("A etapa informada nao pertence ao pipeline selecionado."));
+                .thenThrow(new BusinessRuleException("A etapa informada nao pertence ao pipeline selecionado."));
 
         mockMvc.perform(post("/opportunities")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.status").value(422))
                 .andExpect(jsonPath("$.message").value("A etapa informada nao pertence ao pipeline selecionado."));
     }
 
