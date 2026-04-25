@@ -87,7 +87,7 @@ class LeadControllerTest extends ControllerTestSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.erros[*].fieldName",
-                        hasItems("name", "phone", "email", "leadSource", "entryMethod")));
+                        hasItems("name", "phone", "email", "personType", "leadSource", "entryMethod")));
     }
 
     @Test

@@ -36,18 +36,15 @@ public final class TestAuthentications {
         User userEntity = BeanUtils.instantiateClass(User.class);
 
         Set<Role> rolesSet = new LinkedHashSet<>(Arrays.asList(roles));
+        Set<Integer> roleCodes = rolesSet.stream()
+                .map(Role::getCode)
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
 
         ReflectionTestUtils.setField(userEntity, "id", id);
         ReflectionTestUtils.setField(userEntity, "email", email);
-        ReflectionTestUtils.setField(userEntity, "roles", rolesSet);
+        ReflectionTestUtils.setField(userEntity, "roles", roleCodes);
 
-        UserSecurity principal = new UserSecurity(
-                id,
-                email,
-                "encoded-password",
-                rolesSet,
-                userEntity // Agora com a entidade recheada!
-        );
+        UserSecurity principal = new UserSecurity(userEntity);
 
         return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
     }

@@ -23,12 +23,21 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
     private String password;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "tb_user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "role")
     private Set<Integer> roles = new HashSet<>();
 
     public User(String name, String email, String password) {
@@ -84,12 +93,23 @@ public class User {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof User user)) return false;
-        return Objects.equals(getId(), user.getId());
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof User user)) {
+            return false;
+        }
+
+        if (id == null || user.id == null) {
+            return false;
+        }
+
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return getClass().hashCode();
     }
 }

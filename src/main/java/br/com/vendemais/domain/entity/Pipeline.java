@@ -47,6 +47,11 @@ public class Pipeline {
      * @param stage stage to be managed by this pipeline
      */
     public void addStage(Stage stage) {
+        if (stage == null) {
+            return;
+        }
+
+        stage.setPipeline(this);
         stages.add(stage);
     }
 
@@ -57,7 +62,12 @@ public class Pipeline {
      * @param stage stage to be detached from this pipeline
      */
     public void removeStage(Stage stage) {
+        if (stage == null) {
+            return;
+        }
+
         stages.remove(stage);
+        stage.setPipeline(null);
     }
 
     /**
@@ -86,12 +96,23 @@ public class Pipeline {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Pipeline pipeline)) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Pipeline pipeline)) {
+            return false;
+        }
+
+        if (id == null || pipeline.id == null) {
+            return false;
+        }
+
         return Objects.equals(id, pipeline.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

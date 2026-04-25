@@ -19,8 +19,8 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @NotBlank(message = "Uma task deve ter um nome")
@@ -29,16 +29,19 @@ public class Task {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TaskStatus taskStatus;
 
     @NotNull(message = "Data de vencimento não pode ser vazia")
+    @Column(nullable = false)
     private LocalDate dueDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lead_id")
     private Lead lead;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "opportunity_id")
     private Opportunity opportunity;
 
@@ -119,6 +122,16 @@ public class Task {
         this.opportunity = opportunity;
     }
 
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDate.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDate.now();
+    }
+
     public LocalDate getCreatedAt() {
         return createdAt;
     }
@@ -137,12 +150,23 @@ public class Task {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Task task)) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Task task)) {
+            return false;
+        }
+
+        if (id == null || task.id == null) {
+            return false;
+        }
+
         return Objects.equals(id, task.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

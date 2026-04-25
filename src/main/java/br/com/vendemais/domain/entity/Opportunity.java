@@ -19,18 +19,21 @@ public class Opportunity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "lead_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "lead_id", nullable = false)
     private Lead lead;
 
     private String title;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Solution definitiveSolution;
 
     @Column(precision = 19, scale = 2)
     private BigDecimal estimatedValue;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "current_stage_id", nullable = false)
     private Stage currentStage;
 
     private boolean won;
@@ -57,7 +60,6 @@ public class Opportunity {
         this.won = false;
         this.expectedCloseDate = expectedCloseDate;
         this.notes = notes;
-        this.createdAt = LocalDate.now();
     }
 
     protected Opportunity() {
@@ -147,6 +149,16 @@ public class Opportunity {
         this.notes = notes;
     }
 
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDate.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDate.now();
+    }
+
     public LocalDate getCreatedAt() {
         return createdAt;
     }
@@ -165,12 +177,23 @@ public class Opportunity {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Opportunity that)) return false;
-        return Objects.equals(id, that.id);
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Opportunity opportunity)) {
+            return false;
+        }
+
+        if (id == null || opportunity.id == null) {
+            return false;
+        }
+
+        return Objects.equals(id, opportunity.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

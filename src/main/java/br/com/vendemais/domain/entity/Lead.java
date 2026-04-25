@@ -32,16 +32,23 @@ public class Lead {
     private String email;
 
     @NotNull(message = "Tipo de pessoa é obrigatório")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PersonType personType;
 
     private String companyName;
 
+    @Enumerated(EnumType.STRING)
     private Solution interestSolution;
 
     @NotNull(message = "Origem do lead não pode ser vazia")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LeadSource leadSource;
 
-    @NotNull (message = "Forma de registro do lead não pode ser vazia")
+    @NotNull(message = "Forma de registro do lead não pode ser vazia")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private EntryMethod entryMethod;
 
     @Column(columnDefinition = "TEXT")
@@ -61,7 +68,6 @@ public class Lead {
         this.leadSource = leadSource;
         this.entryMethod = entryMethod;
         this.notes = notes;
-        this.createdAt = LocalDate.now();
     }
 
     protected Lead() {}
@@ -154,6 +160,16 @@ public class Lead {
         this.notes = notes;
     }
 
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDate.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDate.now();
+    }
+
     public LocalDate getCreatedAt() {
         return createdAt;
     }
@@ -172,12 +188,23 @@ public class Lead {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Lead lead)) return false;
-        return Objects.equals(getId(), lead.getId());
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Lead lead)) {
+            return false;
+        }
+
+        if (id == null || lead.id == null) {
+            return false;
+        }
+
+        return Objects.equals(id, lead.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return getClass().hashCode();
     }
 }

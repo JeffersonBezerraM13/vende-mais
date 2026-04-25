@@ -8,24 +8,36 @@ import java.util.Objects;
  * Represents a single ordered checkpoint inside a sales pipeline.
  */
 @Entity
-@Table(name = "stage", uniqueConstraints = {
-        //Bloqueia posições repetidas no mesmo funil
-        @UniqueConstraint(columnNames = {"pipeline_id", "position"})
-})
+@Table(
+        name = "stage",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_stage_pipeline_position",
+                        columnNames = {"pipeline_id", "position"}
+                ),
+                @UniqueConstraint(
+                        name = "uk_stage_pipeline_code",
+                        columnNames = {"pipeline_id", "code"}
+                )
+        }
+)
 public class Stage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
-    @Column(unique = true)
+
+    @Column(nullable = false)
     private String code;
-    @Column
+
+    @Column(nullable = false)
     private Integer position;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pipeline_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "pipeline_id", nullable = false)
     private Pipeline pipeline;
 
     public Stage(String name, String code, Integer position, Pipeline pipeline) {
@@ -35,7 +47,8 @@ public class Stage {
         this.pipeline = pipeline;
     }
 
-    protected Stage() {}
+    protected Stage() {
+    }
 
     public Long getId() {
         return id;
@@ -49,6 +62,12 @@ public class Stage {
         this.name = name;
     }
 
+    /**
+     * Returns the immutable technical code used by the backend to identify the
+     * stage inside a pipeline.
+     *
+     * @return technical stage code
+     */
     public String getCode() {
         return code;
     }
@@ -71,12 +90,23 @@ public class Stage {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Stage stage)) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Stage stage)) {
+            return false;
+        }
+
+        if (id == null || stage.id == null) {
+            return false;
+        }
+
         return Objects.equals(id, stage.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }
