@@ -1,15 +1,20 @@
 package br.com.vendemais.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * Provides JWT creation and validation utilities used by the CRM authentication
@@ -18,16 +23,11 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
-    /**
-     * Token expiration time in milliseconds, configured through application
-     * properties.
-     */
+    private static final Logger logger = LoggerFactory.getLogger(JWTUtil.class);
+
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    /**
-     * Base64-encoded secret key used to sign the token with the HS512 algorithm.
-     */
     @Value("${jwt.secret}")
     private String jwtSecretBase64;
 
@@ -39,10 +39,10 @@ public class JWTUtil {
      */
     public String generateToken(String email) {
         return Jwts.builder()
-                .setSubject(email) // Define a informaÃ§Ã£o principal (subject) do token: o e-mail do usuÃ¡rio
-                .setExpiration(new Date(System.currentTimeMillis() + expiration)) // Define a data de expiraÃ§Ã£o
-                .signWith(getSecretKey(), SignatureAlgorithm.HS512) // Assina o token com a chave segura
-                .compact(); // Compacta o token (gera a string final do JWT)
+                .setSubject(email)
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSecretKey(), SignatureAlgorithm.HS512)
+                .compact();
     }
 
     /**
@@ -57,24 +57,24 @@ public class JWTUtil {
     }
 
     /**
-     * Validates that the token is correctly signed and still within its validity
-     * window.
+     * Validates that the token is correctly signed, contains a subject, and is
+     * still within its validity window.
      *
      * @param token JWT received from the client
      * @return {@code true} when the token is valid and not expired
      */
     public boolean validToken(String token) {
-        Claims claims = getClaims(token);
-        if(claims != null) {
-            String userName = claims.getSubject();
-            Date expirationDate = claims.getExpiration();
-            Date now = new Date(System.currentTimeMillis());
+        return getClaims(token)
+                .map(claims -> {
+                    String username = claims.getSubject();
+                    Date expirationDate = claims.getExpiration();
+                    Date now = new Date(System.currentTimeMillis());
 
-            if(userName != null && expirationDate != null && now.before(expirationDate)) {
-                return true;
-            }
-        }
-        return false;
+                    return username != null
+                            && expirationDate != null
+                            && now.before(expirationDate);
+                })
+                .orElse(false);
     }
 
     /**
@@ -84,25 +84,40 @@ public class JWTUtil {
      * @return email stored in the token subject, or {@code null} when the token is invalid
      */
     public String getUserName(String token) {
-        Claims claims = getClaims(token);
-        if(claims != null){
-            return claims.getSubject();
-        }
-        return null;
+        return getClaims(token)
+                .map(Claims::getSubject)
+                .orElse(null);
     }
 
     /**
      * Parses the claims embedded in the JWT using the configured signing key.
+     * Invalid tokens are rejected without exposing sensitive token contents in
+     * application logs.
+     *
+     * @param token JWT received from the client
+     * @return parsed claims when the token is valid
      */
-    private Claims getClaims(String token) {
+    private Optional<Claims> getClaims(String token) {
+        if (token == null || token.isBlank()) {
+            logger.debug("JWT token ausente ou vazio.");
+            return Optional.empty();
+        }
+
         try {
-            return Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(getSecretKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (Exception e) {
-            return null;
+
+            return Optional.of(claims);
+        } catch (ExpiredJwtException e) {
+            logger.warn("JWT expirado: {}", e.getMessage());
+            return Optional.empty();
+        } catch (JwtException | IllegalArgumentException e) {
+            logger.warn("JWT inválido: {}", e.getClass().getSimpleName());
+            logger.debug("Detalhes da falha ao validar JWT.", e);
+            return Optional.empty();
         }
     }
 }

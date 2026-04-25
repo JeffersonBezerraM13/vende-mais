@@ -1,9 +1,13 @@
 package br.com.vendemais.config;
 
+import br.com.vendemais.controller.exceptions.StandardError;
 import br.com.vendemais.security.JWTAuthenticationFilter;
 import br.com.vendemais.security.JWTAuthorizationFilter;
 import br.com.vendemais.security.JWTUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -23,11 +27,14 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     private static final String[] PUBLIC_MATCHES = {
             "/h2-console/**",
@@ -37,49 +44,53 @@ public class SecurityConfig {
             "/v3/api-docs/**"
     };
 
-    @Autowired
-    private Environment env;
+    private final Environment env;
+    private final JWTUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private JWTUtil jwtUtil;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
+    public SecurityConfig(
+            Environment env,
+            JWTUtil jwtUtil,
+            UserDetailsService userDetailsService,
+            ObjectMapper objectMapper
+    ) {
+        this.env = env;
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
+        this.objectMapper = objectMapper;
+    }
 
     @Bean
     @Profile("test")
-    public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
-
-        // Liberando acesso ao H2-console em perfil test
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
         if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
             http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
         }
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configure(http)) // Mantém o CORS ligado para o seu Frontend local funcionar!
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // Libera todas as rotas
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
-        System.out.println("ATENÇÃO: Segurança desligada para ambiente de testes!");
+        logger.warn("Security is disabled for the test profile.");
 
         return http.build();
     }
 
     @Bean
     @Profile("demo")
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           AuthenticationManager authenticationManager) throws Exception {
-
-        // Liberando acesso ao H2-console em perfil prod
-        if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
+    public SecurityFilterChain demoSecurityFilterChain(
+            HttpSecurity http,
+            AuthenticationManager authenticationManager
+    ) throws Exception {
+        if (Arrays.asList(env.getActiveProfiles()).contains("demo")) {
             http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
         }
 
-        // Filtro de autenticação (login)
         JWTAuthenticationFilter authenticationFilter =
                 new JWTAuthenticationFilter("/login", authenticationManager, jwtUtil);
 
-        // Filtro de autorização (JWT em requests)
         JWTAuthorizationFilter authorizationFilter =
                 new JWTAuthorizationFilter(jwtUtil, userDetailsService);
 
@@ -87,6 +98,38 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setCharacterEncoding("UTF-8");
+                            response.setContentType("application/json;charset=UTF-8");
+
+                            StandardError error = new StandardError(
+                                    System.currentTimeMillis(),
+                                    HttpServletResponse.SC_UNAUTHORIZED,
+                                    "Não autorizado",
+                                    "Token ausente, inválido ou expirado.",
+                                    request.getRequestURI()
+                            );
+
+                            objectMapper.writeValue(response.getWriter(), error);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setCharacterEncoding("UTF-8");
+                            response.setContentType("application/json;charset=UTF-8");
+
+                            StandardError error = new StandardError(
+                                    System.currentTimeMillis(),
+                                    HttpServletResponse.SC_FORBIDDEN,
+                                    "Acesso negado",
+                                    "Você não possui permissão para acessar este recurso.",
+                                    request.getRequestURI()
+                            );
+
+                            objectMapper.writeValue(response.getWriter(), error);
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_MATCHES).permitAll()
                         .requestMatchers("/integrations/marketing/leads/**").hasRole("ADMIN")
@@ -101,8 +144,31 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();
-        configuration.setAllowedMethods(Arrays.asList("POST", "GET", "PUT","PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowCredentials(false); // importante se for usar cookies
+
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173"
+        ));
+
+        configuration.setAllowedMethods(List.of(
+                "POST",
+                "GET",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+        ));
+
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept"
+        ));
+
+        configuration.setExposedHeaders(List.of(
+                "Authorization"
+        ));
+
+        configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -119,5 +185,4 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
 }

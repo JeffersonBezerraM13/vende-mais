@@ -27,7 +27,7 @@ public class UserSecurity implements UserDetails {
         this.email = email;
         this.password = password;
         this.authorities = roles.stream()
-                .map(x -> new SimpleGrantedAuthority(x.getDescription()))
+                .map(x -> new SimpleGrantedAuthority(x.getAuthority()))
                 .collect(Collectors.toSet());
         this.user = user;
     }
@@ -37,7 +37,7 @@ public class UserSecurity implements UserDetails {
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getDescription()))
+                .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
                 .collect(Collectors.toSet());
         this.user = user;
     }

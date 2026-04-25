@@ -1,34 +1,36 @@
 package br.com.vendemais.domain.enums;
 
 public enum Role {
-    ADMIN(0,"ROLE_ADMIN"),
-    USER(1,"ROLE_USER");
+    ADMIN(0, "ROLE_ADMIN"),
+    USER(1, "ROLE_USER");
 
-    private Integer code;
-    private String description;
+    private final Integer code;
+    private final String authority;
 
-    Role(Integer valor, String role) {
-        this.code = valor;
-        this.description = role;
+    Role(Integer code, String authority) {
+        this.code = code;
+        this.authority = authority;
     }
 
     public Integer getCode() {
         return code;
     }
 
-    public String getDescription() {
-        return description;
+    public String getAuthority() {
+        return authority;
     }
 
-    public static Role toEnum(Integer code){
-        if(code == null){
+    public static Role toEnum(Integer code) {
+        if (code == null) {
             return null;
         }
-        for(Role p : Role.values()){
-            if(p.getCode().equals(code)){
-                return p;
+
+        for (Role role : Role.values()) {
+            if (role.getCode().equals(code)) {
+                return role;
             }
         }
-        throw new IllegalArgumentException("No enum constant with value: " + code);
+
+        throw new IllegalArgumentException("Invalid role code: " + code);
     }
 }

@@ -29,7 +29,6 @@ public class JWTAuthenticationFilter extends AbstractAuthenticationProcessingFil
         super(defaultFilterProcessesUrl);
         setAuthenticationManager(authenticationManager);
         this.jwtUtil = jwtUtil;
-        setFilterProcessesUrl("/login"); // Define o endpoint que serÃ¡ interceptado por este filtro
     }
 
     /**
