@@ -1,5 +1,6 @@
 package br.com.vendemais.service;
 
+import br.com.vendemais.domain.dtos.task.TaskFilterDTO;
 import br.com.vendemais.domain.dtos.task.TaskRequestDTO;
 import br.com.vendemais.domain.dtos.task.TaskResponseDTO;
 import br.com.vendemais.domain.entity.Lead;
@@ -9,6 +10,7 @@ import br.com.vendemais.domain.entity.User;
 import br.com.vendemais.repository.LeadRepository;
 import br.com.vendemais.repository.OpportunityRepository;
 import br.com.vendemais.repository.TaskRepository;
+import br.com.vendemais.repository.specification.TaskSpecification;
 import br.com.vendemais.security.SecurityUtils;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
@@ -41,13 +43,19 @@ public class TaskService {
     };
 
     /**
-     * Retrieves tasks in pages so CRM activity views can be rendered efficiently.
+     * Retrieves tasks in pages, applying optional filters so CRM activity views can
+     * search and narrow follow-ups directly by the backend.
      *
+     * @param filter optional filtering criteria, such as search term, status,
+     *               deadline condition and link type
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing task projections mapped to response DTOs
+     * @return a page containing filtered task projections mapped to response DTOs
      */
-    public Page<TaskResponseDTO> findAll(Pageable pageable) {
-        Page<Task> paginaDeTasks = taskRepository.findAll(pageable);
+    public Page<TaskResponseDTO> findAll(TaskFilterDTO filter, Pageable pageable) {
+        Page<Task> paginaDeTasks = taskRepository.findAll(
+                TaskSpecification.withFilters(filter),
+                pageable
+        );
 
         return paginaDeTasks.map(TaskResponseDTO::daEntidade);
     }

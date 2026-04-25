@@ -1,6 +1,6 @@
 package br.com.vendemais.domain.dtos.opportunity;
 
-import br.com.vendemais.domain.enums.OpportunityStatusFilter;
+import br.com.vendemais.domain.enums.filter.OpportunityStatusFilter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 

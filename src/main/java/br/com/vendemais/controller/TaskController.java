@@ -2,6 +2,7 @@ package br.com.vendemais.controller;
 
 import br.com.vendemais.controller.exceptions.StandardError;
 import br.com.vendemais.controller.exceptions.ValidationError;
+import br.com.vendemais.domain.dtos.task.TaskFilterDTO;
 import br.com.vendemais.domain.dtos.task.TaskRequestDTO;
 import br.com.vendemais.domain.dtos.task.TaskResponseDTO;
 import br.com.vendemais.service.TaskService;
@@ -46,23 +47,26 @@ public class TaskController {
 
 
     /**
-     * Returns a paged list of tasks so users can review pending and completed CRM
-     * follow-ups.
+     * Returns a paged and filtered list of tasks so users can review CRM follow-ups
+     * without client-side array filtering.
      *
+     * @param filter optional search, status, deadline and link type filtering criteria
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing task summaries
+     * @return a page containing filtered task summaries
      */
     @GetMapping
-    @Operation(summary = "Lista as tarefas de forma paginada")
+    @Operation(summary = "Lista as tarefas de forma paginada e filtrada")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tarefas recuperadas com sucesso.")
     })
     public ResponseEntity<Page<TaskResponseDTO>> findAll(
-            // Se o front-end não mandar nada, por padrão:
-            // Traz a página 0, com 10 itens, ordenado pelo 'createdAt' do mais novo pro mais velho
+            @Valid @ParameterObject TaskFilterDTO filter,
+
             @ParameterObject
-            @PageableDefault(page = 0,size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
-        Page<TaskResponseDTO> page = taskService.findAll(pageable);
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        Page<TaskResponseDTO> page = taskService.findAll(filter, pageable);
         return ResponseEntity.ok(page);
     }
 

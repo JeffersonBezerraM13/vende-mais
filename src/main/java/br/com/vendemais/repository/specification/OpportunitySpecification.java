@@ -3,7 +3,7 @@ package br.com.vendemais.repository.specification;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityFilterDTO;
 import br.com.vendemais.domain.entity.Opportunity;
 import br.com.vendemais.domain.entity.Stage;
-import br.com.vendemais.domain.enums.OpportunityStatusFilter;
+import br.com.vendemais.domain.enums.filter.OpportunityStatusFilter;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;

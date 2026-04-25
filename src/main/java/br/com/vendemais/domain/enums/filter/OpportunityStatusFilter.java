@@ -1,4 +1,4 @@
-package br.com.vendemais.domain.enums;
+package br.com.vendemais.domain.enums.filter;
 
 public enum OpportunityStatusFilter {
     OPEN,
