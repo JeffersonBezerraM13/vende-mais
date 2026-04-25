@@ -66,7 +66,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("prod")
+    @Profile("demo")
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            AuthenticationManager authenticationManager) throws Exception {
 

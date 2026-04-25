@@ -7,12 +7,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("prod")
-public class InstanciacaoBDProd implements ApplicationRunner {
+@Profile("demo")
+public class InstanciacaoBDDemo implements ApplicationRunner {
 
     private final DbSeeder semeadorBd;
 
-    public InstanciacaoBDProd(DbSeeder semeadorBd) {
+    public InstanciacaoBDDemo(DbSeeder semeadorBd) {
         this.semeadorBd = semeadorBd;
     }
 

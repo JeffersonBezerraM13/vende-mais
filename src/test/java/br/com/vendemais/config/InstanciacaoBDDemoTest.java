@@ -7,14 +7,14 @@ import org.springframework.boot.DefaultApplicationArguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class InstanciacaoBDProdTest {
+class InstanciacaoBDDemoTest {
 
     @Test
     void runDelegatesToDbSeeder() throws Exception {
         DbSeeder dbSeeder = mock(DbSeeder.class);
-        InstanciacaoBDProd instanciacaoBDProd = new InstanciacaoBDProd(dbSeeder);
+        InstanciacaoBDDemo instanciacaoBDDemo = new InstanciacaoBDDemo(dbSeeder);
 
-        instanciacaoBDProd.run(new DefaultApplicationArguments(new String[0]));
+        instanciacaoBDDemo.run(new DefaultApplicationArguments(new String[0]));
 
         verify(dbSeeder).populateDb();
     }
