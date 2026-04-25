@@ -9,7 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PipelineRepository extends JpaRepository<Pipeline, Long> {
 
-    boolean existsByTitle(String title);
+    boolean existsByTitleIgnoreCase(String title);
+
+    boolean existsByTitleIgnoreCaseAndIdNot(String title, Long id);
 
     Page<Pipeline> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 }

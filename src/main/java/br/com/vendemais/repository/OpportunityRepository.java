@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OpportunityRepository extends JpaRepository<Opportunity, Long>, JpaSpecificationExecutor<Opportunity> {
 
-    boolean existsByLeadIdAndClosedAtIsNull(Long leadId);
+    boolean existsByLeadIdAndWonFalseAndClosedAtIsNull(Long leadId);
 }
