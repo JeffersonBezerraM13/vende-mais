@@ -17,7 +17,7 @@ public class StandardError  {
     @Schema(example = "Object Not Found")
     private String error;
 
-    @Schema(example = "Lead nao encontrado.")
+    @Schema(example = "Lead não encontrado.")
     private String message;
 
     @Schema(example = "/leads/99")

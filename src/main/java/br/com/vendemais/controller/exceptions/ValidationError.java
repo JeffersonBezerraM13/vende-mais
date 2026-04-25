@@ -12,7 +12,7 @@ import java.util.List;
 @Schema(name = "ValidationError", description = "Formato de erro retornado quando o payload da requisicao e invalido.")
 public class ValidationError extends StandardError{
 
-    @Schema(example = "[{\"fieldName\":\"email\",\"message\":\"Formato de email invalido\"}]")
+    @Schema(example = "[{\"fieldName\":\"email\",\"message\":\"Formato de email inválido\"}]")
     private List<FieldMessage> erros = new ArrayList<>();
 
     public ValidationError(Long timestamp, Integer status, String error, String message, String path) {

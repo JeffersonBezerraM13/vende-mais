@@ -2,6 +2,7 @@ package br.com.vendemais.controller;
 
 import br.com.vendemais.controller.exceptions.StandardError;
 import br.com.vendemais.controller.exceptions.ValidationError;
+import br.com.vendemais.domain.dtos.pipeline.PipelineFilterDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineRequestDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
 import br.com.vendemais.domain.dtos.stage.StageRequestDTO;
@@ -52,23 +53,26 @@ public class PipelineController {
     }
 
     /**
-     * Returns a paged list of pipelines so CRM clients can present available
-     * funnel configurations.
+     * Returns a paged and filtered list of pipelines so CRM clients can search
+     * funnel configurations by title without client-side array filtering.
      *
+     * @param filter optional pipeline title search criteria
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing pipeline summaries
+     * @return a page containing filtered pipeline summaries
      */
     @GetMapping
-    @Operation(summary = "Lista os pipelines de forma paginada")
+    @Operation(summary = "Lista os pipelines de forma paginada e filtrada")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Pipelines recuperados com sucesso.")
     })
     public ResponseEntity<Page<PipelineResponseDTO>> findAll(
-            // Se o front-end não mandar nada, por padrão:
-            // Traz a página 0, com 10 itens, ordenado pelo 'id' do mais novo pro mais velho
+            @Valid @ParameterObject PipelineFilterDTO filter,
+
             @ParameterObject
-            @PageableDefault(page = 0,size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
-        Page<PipelineResponseDTO> page = pipelineService.findAll(pageable);
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ) {
+        Page<PipelineResponseDTO> page = pipelineService.findAll(filter, pageable);
         return ResponseEntity.ok(page);
     }
 

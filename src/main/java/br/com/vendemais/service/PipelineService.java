@@ -1,5 +1,6 @@
 package br.com.vendemais.service;
 
+import br.com.vendemais.domain.dtos.pipeline.PipelineFilterDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineRequestDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
 import br.com.vendemais.domain.entity.Pipeline;
@@ -26,14 +27,24 @@ public class PipelineService {
     };
 
     /**
-     * Retrieves pipelines in pages so the CRM can browse funnel definitions
-     * without loading all records at once.
+     * Retrieves pipelines in pages, applying an optional title search so CRM clients
+     * can browse funnel definitions without loading all records at once.
      *
+     * @param filter optional filtering criteria, such as the pipeline title search term
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing pipeline projections mapped to response DTOs
+     * @return a page containing filtered pipeline projections mapped to response DTOs
      */
-    public Page<PipelineResponseDTO> findAll(Pageable pageable) {
-        Page<Pipeline> paginaDePipelines = pipelineRepository.findAll(pageable);
+    public Page<PipelineResponseDTO> findAll(PipelineFilterDTO filter, Pageable pageable) {
+        Page<Pipeline> paginaDePipelines;
+
+        if (filter.search() != null && !filter.search().isBlank()) {
+            paginaDePipelines = pipelineRepository.findByTitleContainingIgnoreCase(
+                    filter.search().trim(),
+                    pageable
+            );
+        } else {
+            paginaDePipelines = pipelineRepository.findAll(pageable);
+        }
 
         return paginaDePipelines.map(PipelineResponseDTO::daEntidade);
     }
