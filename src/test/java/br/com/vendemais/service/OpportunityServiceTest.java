@@ -14,7 +14,8 @@ import br.com.vendemais.repository.LeadRepository;
 import br.com.vendemais.repository.OpportunityRepository;
 import br.com.vendemais.repository.PipelineRepository;
 import br.com.vendemais.repository.StageRepository;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.repository.TaskRepository;
+import br.com.vendemais.service.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,6 +49,9 @@ class OpportunityServiceTest {
 
     @Mock
     private StageRepository stageRepository;
+
+    @Mock
+    private TaskRepository taskRepository;
 
     @InjectMocks
     private OpportunityService opportunityService;
@@ -87,7 +91,7 @@ class OpportunityServiceTest {
         assertThat(response.title()).isEqualTo(dto.title());
         assertThat(response.definitiveSolution()).isEqualTo(dto.definitiveSolution());
 
-        verify(leadRepository).save(lead);
+        verify(leadRepository).findById(lead.getId());
         verify(opportunityRepository).save(any(Opportunity.class));
     }
 
@@ -114,7 +118,7 @@ class OpportunityServiceTest {
         when(stageRepository.findById(foreignStage.getId())).thenReturn(Optional.of(foreignStage));
 
         assertThatThrownBy(() -> opportunityService.create(dto))
-                .isInstanceOf(DataIntegrityViolationException.class)
+                .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("pipeline");
 
         verify(opportunityRepository, never()).save(any(Opportunity.class));
@@ -158,12 +162,17 @@ class OpportunityServiceTest {
 
     @Test
     void hasOpenOpportunitiesShouldReturnRepositoryResult() {
-        when(opportunityRepository.existsByLeadIdAndClosedAtIsNull(7L)).thenReturn(true);
+        Lead lead = lead(7L);
+
+        when(leadRepository.findById(7L)).thenReturn(Optional.of(lead));
+        when(opportunityRepository.existsByLeadIdAndWonFalseAndClosedAtIsNull(7L)).thenReturn(true);
 
         boolean hasOpenOpportunities = opportunityService.hasOpenOpportunities(7L);
 
         assertThat(hasOpenOpportunities).isTrue();
-        verify(opportunityRepository).existsByLeadIdAndClosedAtIsNull(7L);
+
+        verify(leadRepository).findById(7L);
+        verify(opportunityRepository).existsByLeadIdAndWonFalseAndClosedAtIsNull(7L);
     }
 
     @Test
@@ -172,7 +181,8 @@ class OpportunityServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Lead");
 
-        verify(opportunityRepository, never()).existsByLeadIdAndClosedAtIsNull(any());
+        verifyNoInteractions(leadRepository);
+        verify(opportunityRepository, never()).existsByLeadIdAndWonFalseAndClosedAtIsNull(any());
     }
 
     private Lead lead(Long id) {

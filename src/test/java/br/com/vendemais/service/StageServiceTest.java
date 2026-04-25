@@ -6,7 +6,7 @@ import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.domain.entity.Stage;
 import br.com.vendemais.repository.PipelineRepository;
 import br.com.vendemais.repository.StageRepository;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.service.exceptions.BusinessRuleException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,17 +62,40 @@ class StageServiceTest {
         when(pipelineRepository.findById(10L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> stageService.createStage(dto))
-                .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessageContaining("Funil");
+                .isInstanceOf(ObjectNotFoundException.class)
+                .hasMessageContaining("Pipeline");
     }
 
     @Test
     void updateStageShouldRejectStageOutsidePipeline() {
-        StageRequestDTO dto = new StageRequestDTO("Contato", "CONTATO", 1, 10L);
-        when(stageRepository.findByIdAndPipelineId(99L, dto.pipelineId())).thenReturn(Optional.empty());
+        Pipeline pipeline = new Pipeline("Pipeline Comercial");
+        setId(pipeline, 10L);
+
+        StageRequestDTO dto = new StageRequestDTO("Contato", "CONTATO", 1, pipeline.getId());
+
+        when(pipelineRepository.findById(pipeline.getId())).thenReturn(Optional.of(pipeline));
+        when(stageRepository.findByIdAndPipelineId(99L, pipeline.getId())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> stageService.updateStage(99L, dto))
                 .isInstanceOf(ObjectNotFoundException.class)
-                .hasMessageContaining("funil");
+                .hasMessageContaining("Stage");
+    }
+
+    @Test
+    void updateStageShouldRejectCodeChange() {
+        Pipeline pipeline = new Pipeline("Pipeline Comercial");
+        setId(pipeline, 10L);
+
+        Stage stage = new Stage("Contato", "CONTATO", 1, pipeline);
+        setId(stage, 99L);
+
+        StageRequestDTO dto = new StageRequestDTO("Contato atualizado", "OUTRO_CODE", 1, pipeline.getId());
+
+        when(pipelineRepository.findById(pipeline.getId())).thenReturn(Optional.of(pipeline));
+        when(stageRepository.findByIdAndPipelineId(stage.getId(), pipeline.getId())).thenReturn(Optional.of(stage));
+
+        assertThatThrownBy(() -> stageService.updateStage(stage.getId(), dto))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("código técnico");
     }
 }

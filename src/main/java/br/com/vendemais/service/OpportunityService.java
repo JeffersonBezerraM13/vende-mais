@@ -8,9 +8,13 @@ import br.com.vendemais.domain.entity.Lead;
 import br.com.vendemais.domain.entity.Opportunity;
 import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.domain.entity.Stage;
-import br.com.vendemais.repository.*;
+import br.com.vendemais.repository.LeadRepository;
+import br.com.vendemais.repository.OpportunityRepository;
+import br.com.vendemais.repository.PipelineRepository;
+import br.com.vendemais.repository.StageRepository;
+import br.com.vendemais.repository.TaskRepository;
 import br.com.vendemais.repository.specification.OpportunitySpecification;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.service.exceptions.BusinessRuleException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,11 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 /**
  * Orchestrates opportunity lifecycle rules, including pipeline assignment, stage
- * validation, and win/loss closing logic.
+ * validation, open negotiation checks, and win/loss closing logic.
  */
 @Service
 @Transactional(readOnly = true)
@@ -58,12 +61,12 @@ public class OpportunityService {
      * @return a page containing filtered opportunity projections mapped to response DTOs
      */
     public Page<OpportunityResponseDTO> findAll(OpportunityFilterDTO filter, Pageable pageable) {
-        Page<Opportunity> paginaDeOpportunitys = opportunityRepository.findAll(
+        Page<Opportunity> opportunitiesPage = opportunityRepository.findAll(
                 OpportunitySpecification.withFilters(filter),
                 pageable
         );
 
-        return paginaDeOpportunitys.map(OpportunityResponseDTO::daEntidade);
+        return opportunitiesPage.map(OpportunityResponseDTO::daEntidade);
     }
 
     /**
@@ -75,12 +78,8 @@ public class OpportunityService {
      * @throws ObjectNotFoundException if the opportunity does not exist
      */
     public OpportunityResponseDTO findById(Long id) {
-        Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
+        Opportunity opportunity = findOpportunityById(id);
         return OpportunityResponseDTO.daEntidade(opportunity);
-    }
-
-    private Optional<Opportunity> findOpportunityById(Long id) {
-        return opportunityRepository.findById(id);
     }
 
     /**
@@ -88,15 +87,18 @@ public class OpportunityService {
      * opportunity is created for it.
      *
      * @param leadId identifier of the lead being inspected
-     * @return {@code true} when the lead has at least one opportunity without a close date
-     * @throws IllegalArgumentException if {@code leadId} is {@code null}
+     * @return {@code true} when the lead has at least one opportunity marked as open
+     * @throws IllegalArgumentException if the informed lead id is {@code null}
+     * @throws ObjectNotFoundException if the lead does not exist
      */
     public boolean hasOpenOpportunities(Long leadId) {
         if (leadId == null) {
             throw new IllegalArgumentException("O ID do Lead não pode ser nulo.");
         }
 
-        return opportunityRepository.existsByLeadIdAndClosedAtIsNull(leadId);
+        findLeadById(leadId);
+
+        return opportunityRepository.existsByLeadIdAndWonFalseAndClosedAtIsNull(leadId);
     }
 
     /**
@@ -105,64 +107,43 @@ public class OpportunityService {
      *
      * @param dto payload describing the opportunity to persist
      * @return the persisted opportunity mapped to the API response DTO
-     * @throws DataIntegrityViolationException if referenced lead, pipeline, or stage data is invalid
+     * @throws ObjectNotFoundException if referenced lead, pipeline, or stage data does not exist
+     * @throws BusinessRuleException if the selected stage does not belong to the selected pipeline
      */
     @Transactional
     public OpportunityResponseDTO create(OpportunityRequestDTO dto) {
-        Lead lead = leadRepository.findById(dto.leadId())
-                .orElseThrow(() -> new DataIntegrityViolationException("Lead não existente"));
-
-        Pipeline pipeline = pipelineRepository.findById(dto.pipelineId())
-                .orElseThrow(() -> new DataIntegrityViolationException("Funil não existe"));
-
+        Lead lead = findLeadById(dto.leadId());
+        Pipeline pipeline = findPipelineById(dto.pipelineId());
         Stage currentStage = resolveCurrentStage(dto.currentStageId(), pipeline);
 
-        Opportunity opportunity = new Opportunity(
-                lead,
-                dto.title(),
-                dto.definitiveSolution(),
-                dto.estimatedValue(),
-                currentStage,
-                dto.expectedCloseDate(),
-                dto.notes()
-        );
-
-        leadRepository.save(lead);
+        Opportunity opportunity = buildOpportunity(dto, lead, currentStage);
 
         return OpportunityResponseDTO.daEntidade(opportunityRepository.save(opportunity));
     }
 
     /**
-     * Updates an opportunity while enforcing that the selected stage belongs to
-     * the selected pipeline.
+     * Updates an open opportunity while enforcing that the selected stage belongs to
+     * the selected pipeline. Closed opportunities cannot be changed through the
+     * general update flow because closing a deal is treated as a final business
+     * event.
      *
      * @param id identifier of the opportunity being updated
      * @param dto payload containing the revised opportunity state
      * @return the persisted opportunity mapped to the API response DTO
-     * @throws ObjectNotFoundException if the opportunity does not exist
-     * @throws DataIntegrityViolationException if referenced lead, pipeline, or stage data is invalid
+     * @throws ObjectNotFoundException if the opportunity or referenced records do not exist
+     * @throws BusinessRuleException if the opportunity is already closed or the selected stage does not belong to the selected pipeline
      */
     @Transactional
     public OpportunityResponseDTO update(Long id, OpportunityRequestDTO dto) {
-        Opportunity opportunity = opportunityRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("Opportunity não encontrada"));
+        Opportunity opportunity = findOpportunityById(id);
 
-        Lead lead = leadRepository.findById(dto.leadId())
-                .orElseThrow(() -> new DataIntegrityViolationException("Lead não existente"));
+        ensureOpportunityIsOpen(opportunity);
 
-        Pipeline pipeline = pipelineRepository.findById(dto.pipelineId())
-                .orElseThrow(() -> new DataIntegrityViolationException("Funil não existe"));
-
+        Lead lead = findLeadById(dto.leadId());
+        Pipeline pipeline = findPipelineById(dto.pipelineId());
         Stage currentStage = resolveCurrentStage(dto.currentStageId(), pipeline);
 
-        opportunity.setLead(lead);
-        opportunity.setTitle(dto.title());
-        opportunity.setDefinitiveSolution(dto.definitiveSolution());
-        opportunity.setEstimatedValue(dto.estimatedValue());
-        opportunity.setCurrentStage(currentStage);
-        opportunity.setExpectedCloseDate(dto.expectedCloseDate());
-        opportunity.setNotes(dto.notes());
-        opportunity.setUpdatedAt(LocalDate.now());
+        updateOpportunityData(opportunity, dto, lead, currentStage);
 
         return OpportunityResponseDTO.daEntidade(opportunityRepository.save(opportunity));
     }
@@ -175,47 +156,17 @@ public class OpportunityService {
      * @param dto payload indicating the closing outcome
      * @return the persisted opportunity mapped to the API response DTO
      * @throws ObjectNotFoundException if the opportunity does not exist
-     * @throws DataIntegrityViolationException if the opportunity is already closed or lacks a loss reason
+     * @throws BusinessRuleException if the opportunity is already closed or lacks a loss reason
      */
     @Transactional
     public OpportunityResponseDTO close(Long id, OpportunityCloseDTO dto) {
-        Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
+        Opportunity opportunity = findOpportunityById(id);
 
-        if (opportunity.getClosedAt() != null) {
-            throw new DataIntegrityViolationException("Essa oportunidade já foi fechada.");
-        }
-
-        if (Boolean.FALSE.equals(dto.win()) && (dto.lossReason() == null || dto.lossReason().isBlank())) {
-            throw new DataIntegrityViolationException("O motivo de perda é obrigatório quando a oportunidade é perdida.");
-        }
-
-        opportunity.setWon(dto.win());
-        opportunity.setClosedAt(LocalDate.now());
-        opportunity.setLossReason(Boolean.TRUE.equals(dto.win()) ? null : dto.lossReason().trim());
-        opportunity.setUpdatedAt(LocalDate.now());
+        ensureOpportunityIsOpen(opportunity);
+        validateClosePayload(dto);
+        applyClosingResult(opportunity, dto);
 
         return OpportunityResponseDTO.daEntidade(opportunityRepository.save(opportunity));
-    }
-
-    private Stage resolveCurrentStage(Long currentStageId, Pipeline pipeline) {
-        if (currentStageId == null) {
-            Stage firstStage = pipeline.getFirstStage();
-
-            if (firstStage == null) {
-                throw new DataIntegrityViolationException("O pipeline informado não possui etapas cadastradas.");
-            }
-
-            return firstStage;
-        }
-
-        Stage stage = stageRepository.findById(currentStageId)
-                .orElseThrow(() -> new ObjectNotFoundException("Stage não encontrada"));
-
-        if (!stage.getPipeline().getId().equals(pipeline.getId())) {
-            throw new DataIntegrityViolationException("A etapa informada não pertence ao pipeline selecionado.");
-        }
-
-        return stage;
     }
 
     /**
@@ -226,11 +177,120 @@ public class OpportunityService {
      * @throws ObjectNotFoundException if the opportunity does not exist
      */
     @Transactional
-    public void delete(Long id){
-        Opportunity opportunity = findOpportunityById(id).orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
+    public void delete(Long id) {
+        Opportunity opportunity = findOpportunityById(id);
 
         taskRepository.deleteByOpportunityId(opportunity.getId());
-
         opportunityRepository.delete(opportunity);
+    }
+
+    private Opportunity buildOpportunity(
+            OpportunityRequestDTO dto,
+            Lead lead,
+            Stage currentStage
+    ) {
+        return new Opportunity(
+                lead,
+                dto.title(),
+                dto.definitiveSolution(),
+                dto.estimatedValue(),
+                currentStage,
+                dto.expectedCloseDate(),
+                dto.notes()
+        );
+    }
+
+    private void updateOpportunityData(
+            Opportunity opportunity,
+            OpportunityRequestDTO dto,
+            Lead lead,
+            Stage currentStage
+    ) {
+        opportunity.setLead(lead);
+        opportunity.setTitle(dto.title());
+        opportunity.setDefinitiveSolution(dto.definitiveSolution());
+        opportunity.setEstimatedValue(dto.estimatedValue());
+        opportunity.setCurrentStage(currentStage);
+        opportunity.setExpectedCloseDate(dto.expectedCloseDate());
+        opportunity.setNotes(dto.notes());
+        opportunity.setUpdatedAt(LocalDate.now());
+    }
+
+    private Stage resolveCurrentStage(Long currentStageId, Pipeline pipeline) {
+        if (currentStageId == null) {
+            return resolveFirstStage(pipeline);
+        }
+
+        Stage stage = findStageById(currentStageId);
+        ensureStageBelongsToPipeline(stage, pipeline);
+
+        return stage;
+    }
+
+    private Stage resolveFirstStage(Pipeline pipeline) {
+        Stage firstStage = pipeline.getFirstStage();
+
+        if (firstStage == null) {
+            throw new BusinessRuleException("O pipeline informado não possui etapas cadastradas.");
+        }
+
+        return firstStage;
+    }
+
+    private void ensureStageBelongsToPipeline(Stage stage, Pipeline pipeline) {
+        if (stage.getPipeline() == null || !stage.getPipeline().getId().equals(pipeline.getId())) {
+            throw new BusinessRuleException("A etapa informada não pertence ao pipeline selecionado.");
+        }
+    }
+
+    private void ensureOpportunityIsOpen(Opportunity opportunity) {
+        if (opportunity.getClosedAt() != null) {
+            throw new BusinessRuleException("Essa oportunidade já foi fechada.");
+        }
+    }
+
+    private void validateClosePayload(OpportunityCloseDTO dto) {
+        if (Boolean.FALSE.equals(dto.win()) && isBlank(dto.lossReason())) {
+            throw new BusinessRuleException("O motivo de perda é obrigatório quando a oportunidade é perdida.");
+        }
+    }
+
+    private void applyClosingResult(Opportunity opportunity, OpportunityCloseDTO dto) {
+        opportunity.setWon(dto.win());
+        opportunity.setClosedAt(LocalDate.now());
+        opportunity.setLossReason(resolveLossReason(dto));
+        opportunity.setUpdatedAt(LocalDate.now());
+    }
+
+    private String resolveLossReason(OpportunityCloseDTO dto) {
+        if (Boolean.TRUE.equals(dto.win())) {
+            return null;
+        }
+
+        return dto.lossReason().trim();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private Lead findLeadById(Long id) {
+        return leadRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Lead não encontrado. ID: " + id));
+    }
+
+    private Pipeline findPipelineById(Long id) {
+        return pipelineRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Pipeline não encontrado. ID: " + id));
+    }
+
+    private Stage findStageById(Long id) {
+        return stageRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Stage não encontrada. ID: " + id));
+    }
+
+    private Opportunity findOpportunityById(Long id) {
+        return opportunityRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada. ID: " + id));
     }
 }

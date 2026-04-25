@@ -5,8 +5,9 @@ import br.com.vendemais.domain.dtos.pipeline.PipelineRequestDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
 import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.repository.PipelineRepository;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.service.exceptions.DuplicateResourceException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
+import br.com.vendemais.service.exceptions.ResourceInUseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class PipelineService {
 
     public PipelineService(PipelineRepository pipelineRepository) {
         this.pipelineRepository = pipelineRepository;
-    };
+    }
 
     /**
      * Retrieves pipelines in pages, applying an optional title search so CRM clients
@@ -35,18 +36,11 @@ public class PipelineService {
      * @return a page containing filtered pipeline projections mapped to response DTOs
      */
     public Page<PipelineResponseDTO> findAll(PipelineFilterDTO filter, Pageable pageable) {
-        Page<Pipeline> paginaDePipelines;
+        Page<Pipeline> pipelinesPage = hasSearchTerm(filter)
+                ? pipelineRepository.findByTitleContainingIgnoreCase(filter.search().trim(), pageable)
+                : pipelineRepository.findAll(pageable);
 
-        if (filter.search() != null && !filter.search().isBlank()) {
-            paginaDePipelines = pipelineRepository.findByTitleContainingIgnoreCase(
-                    filter.search().trim(),
-                    pageable
-            );
-        } else {
-            paginaDePipelines = pipelineRepository.findAll(pageable);
-        }
-
-        return paginaDePipelines.map(PipelineResponseDTO::daEntidade);
+        return pipelinesPage.map(PipelineResponseDTO::daEntidade);
     }
 
     /**
@@ -67,35 +61,37 @@ public class PipelineService {
      *
      * @param dto payload describing the pipeline being created
      * @return the persisted pipeline mapped to the API response DTO
-     * @throws DataIntegrityViolationException if another pipeline already uses the same title
+     * @throws DuplicateResourceException if another pipeline already uses the same title
      */
     @Transactional
     public PipelineResponseDTO create(PipelineRequestDTO dto) {
-        if(existsbyTitle(dto.title())){
-            throw new DataIntegrityViolationException("Pipeline já está cadastrado no sistema");
-        }
+        String normalizedTitle = normalizeTitle(dto.title());
 
-        Pipeline pipeline = new Pipeline(
-                dto.title()
-        );
+        ensureTitleAvailableForCreation(normalizedTitle);
+
+        Pipeline pipeline = new Pipeline(normalizedTitle);
 
         return PipelineResponseDTO.daEntidade(pipelineRepository.save(pipeline));
     }
 
     /**
-     * Updates the descriptive data of an existing pipeline.
+     * Updates the descriptive data of an existing pipeline after validating that
+     * the new title does not belong to another pipeline.
      *
      * @param id identifier of the pipeline being updated
      * @param dto payload containing the revised pipeline data
      * @return the persisted pipeline mapped to the API response DTO
      * @throws ObjectNotFoundException if the pipeline does not exist
+     * @throws DuplicateResourceException if the new title belongs to another pipeline
      */
     @Transactional
     public PipelineResponseDTO update(Long id, PipelineRequestDTO dto) {
         Pipeline pipeline = findPipelineById(id);
+        String normalizedTitle = normalizeTitle(dto.title());
 
-        pipeline.setTitle(dto.title());
+        ensureTitleAvailableForUpdate(id, normalizedTitle);
 
+        pipeline.setTitle(normalizedTitle);
 
         return PipelineResponseDTO.daEntidade(pipelineRepository.save(pipeline));
     }
@@ -105,23 +101,44 @@ public class PipelineService {
      *
      * @param id identifier of the pipeline to delete
      * @throws ObjectNotFoundException if the pipeline does not exist
-     * @throws DataIntegrityViolationException if the pipeline is still referenced by related records
+     * @throws ResourceInUseException if the pipeline is still referenced by stages or opportunities
      */
     @Transactional
-    public void delete(Long id){
+    public void delete(Long id) {
         Pipeline pipeline = findPipelineById(id);
-        try{
+
+        try {
             pipelineRepository.delete(pipeline);
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            throw new DataIntegrityViolationException("Você não pode apagar este funil pois ele está sendo utilizado em etapas ou oportunidades.");
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new ResourceInUseException(
+                    "Você não pode apagar este funil pois ele está sendo utilizado em etapas ou oportunidades.",
+                    ex
+            );
+        }
+    }
+
+    private boolean hasSearchTerm(PipelineFilterDTO filter) {
+        return filter != null && filter.search() != null && !filter.search().isBlank();
+    }
+
+    private String normalizeTitle(String title) {
+        return title == null ? null : title.trim();
+    }
+
+    private void ensureTitleAvailableForCreation(String title) {
+        if (pipelineRepository.existsByTitleIgnoreCase(title)) {
+            throw new DuplicateResourceException("Já existe um funil cadastrado com este título.");
+        }
+    }
+
+    private void ensureTitleAvailableForUpdate(Long pipelineId, String title) {
+        if (pipelineRepository.existsByTitleIgnoreCaseAndIdNot(title, pipelineId)) {
+            throw new DuplicateResourceException("Já existe outro funil cadastrado com este título.");
         }
     }
 
     private Pipeline findPipelineById(Long id) {
-        return pipelineRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Pipeline não encontrado. ID:" +id));
-    }
-    
-    public boolean existsbyTitle(String title) {
-        return pipelineRepository.existsByTitle(title);
+        return pipelineRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Pipeline não encontrado. ID: " + id));
     }
 }

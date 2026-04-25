@@ -7,14 +7,14 @@ import br.com.vendemais.domain.entity.Lead;
 import br.com.vendemais.domain.entity.Opportunity;
 import br.com.vendemais.domain.entity.Task;
 import br.com.vendemais.domain.entity.User;
+import br.com.vendemais.domain.enums.TaskStatus;
 import br.com.vendemais.repository.LeadRepository;
 import br.com.vendemais.repository.OpportunityRepository;
 import br.com.vendemais.repository.TaskRepository;
 import br.com.vendemais.repository.specification.TaskSpecification;
 import br.com.vendemais.security.SecurityUtils;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.service.exceptions.BusinessRuleException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,16 +31,18 @@ import java.time.LocalDate;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final LeadRepository leadRepository;
+    private final OpportunityRepository opportunityRepository;
 
-    @Autowired
-    private LeadRepository leadRepository;
-
-    @Autowired
-    private OpportunityRepository opportunityRepository;
-
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(
+            TaskRepository taskRepository,
+            LeadRepository leadRepository,
+            OpportunityRepository opportunityRepository
+    ) {
         this.taskRepository = taskRepository;
-    };
+        this.leadRepository = leadRepository;
+        this.opportunityRepository = opportunityRepository;
+    }
 
     /**
      * Retrieves tasks in pages, applying optional filters so CRM activity views can
@@ -52,12 +54,12 @@ public class TaskService {
      * @return a page containing filtered task projections mapped to response DTOs
      */
     public Page<TaskResponseDTO> findAll(TaskFilterDTO filter, Pageable pageable) {
-        Page<Task> paginaDeTasks = taskRepository.findAll(
+        Page<Task> tasksPage = taskRepository.findAll(
                 TaskSpecification.withFilters(filter),
                 pageable
         );
 
-        return paginaDeTasks.map(TaskResponseDTO::daEntidade);
+        return tasksPage.map(TaskResponseDTO::daEntidade);
     }
 
     /**
@@ -75,89 +77,46 @@ public class TaskService {
 
     /**
      * Creates a task and enforces the CRM rule that every activity must be linked
-     * to a lead or an opportunity.
+     * to a lead or an opportunity. The task owner is resolved from the authenticated
+     * user instead of trusting a user id sent by the client.
      *
      * @param dto payload describing the task to schedule
      * @return the persisted task mapped to the API response DTO
-     * @throws DataIntegrityViolationException if the linked lead or opportunity is invalid or absent
+     * @throws ObjectNotFoundException if the linked lead or opportunity does not exist
+     * @throws BusinessRuleException if the task is not linked to a lead or opportunity
      */
     @Transactional
     public TaskResponseDTO create(TaskRequestDTO dto) {
-        Lead lead = null;
-        Opportunity opportunity = null;
+        User loggedUser = SecurityUtils.getLoggedUser();
+        Lead lead = resolveLead(dto.leadId());
+        Opportunity opportunity = resolveOpportunity(dto.opportunityId());
 
-        if (dto.leadId() != null) {
-            lead = leadRepository.findById(dto.leadId())
-                    .orElseThrow(() -> new DataIntegrityViolationException("Lead não encontrado"));
-        }
+        ensureTaskHasExactlyOneCommercialLink(lead, opportunity);
 
-        if (dto.opportunityId() != null) {
-            opportunity = opportunityRepository.findById(dto.opportunityId())
-                    .orElseThrow(() -> new DataIntegrityViolationException("Oportunidade não encontrada"));
-        }
-
-        if (lead == null && opportunity == null) {
-            throw new DataIntegrityViolationException("Toda tarefa deve estar vinculada a um Lead ou a uma Oportunidade.");
-        }
-
-        User user = SecurityUtils.getLoggedUser();
-
-        Task task = new Task(
-                user,
-                dto.title(),
-                dto.description(),
-                dto.taskStatus(), // Ou defina como PENDING por padrão, dependendo de como você fez
-                dto.dueDate(),
-                lead,
-                opportunity
-        );
+        Task task = buildTask(dto, loggedUser, lead, opportunity);
 
         return TaskResponseDTO.daEntidade(taskRepository.save(task));
     }
 
     /**
      * Updates a task while revalidating its linkage to the commercial records it
-     * supports.
+     * supports. The task owner is refreshed from the authenticated user.
      *
      * @param id identifier of the task being updated
      * @param dto payload containing the revised task data
      * @return the persisted task mapped to the API response DTO
      * @throws ObjectNotFoundException if the task or one of its referenced records does not exist
-     * @throws DataIntegrityViolationException if the task is left without a lead or opportunity linkage
+     * @throws BusinessRuleException if the task is left without a lead or opportunity linkage
      */
     @Transactional
     public TaskResponseDTO update(Long id, TaskRequestDTO dto) {
-        User user = SecurityUtils.getLoggedUser();
-
         Task task = findTaskById(id);
+        User loggedUser = SecurityUtils.getLoggedUser();
+        Lead lead = resolveLead(dto.leadId());
+        Opportunity opportunity = resolveOpportunity(dto.opportunityId());
 
-        Lead lead = null;
-        Opportunity op = null;
-
-        if (dto.leadId() != null) {
-            lead = leadRepository.findById(dto.leadId())
-                    .orElseThrow(() -> new ObjectNotFoundException("Lead não encontrado"));
-        }
-
-        if (dto.opportunityId() != null) {
-            op = opportunityRepository.findById(dto.opportunityId())
-                    .orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada"));
-        }
-
-        if (lead == null && op == null) {
-            throw new DataIntegrityViolationException("Toda tarefa deve estar vinculada a um Lead ou a uma Oportunidade.");
-        }
-
-        task.setUser(user);
-        task.setTitle(dto.title());
-        task.setDescription(dto.description());
-        if (dto.taskStatus() != null) {
-            task.setStatus(dto.taskStatus());
-        }
-        task.setDueDate(dto.dueDate());
-        task.setLead(lead);
-        task.setOpportunity(op);
-        task.setUpdatedAt(LocalDate.now());
+        ensureTaskHasExactlyOneCommercialLink(lead, opportunity);
+        updateTaskData(task, dto, loggedUser, lead, opportunity);
 
         return TaskResponseDTO.daEntidade(taskRepository.save(task));
     }
@@ -169,12 +128,79 @@ public class TaskService {
      * @throws ObjectNotFoundException if the task does not exist
      */
     @Transactional
-    public void delete(Long id){
+    public void delete(Long id) {
         Task task = findTaskById(id);
         taskRepository.delete(task);
     }
 
+    private Task buildTask(
+            TaskRequestDTO dto,
+            User user,
+            Lead lead,
+            Opportunity opportunity
+    ) {
+        return new Task(
+                user,
+                dto.title(),
+                dto.description(),
+                resolveTaskStatus(dto.taskStatus()),
+                dto.dueDate(),
+                lead,
+                opportunity
+        );
+    }
+
+    private void updateTaskData(
+            Task task,
+            TaskRequestDTO dto,
+            User user,
+            Lead lead,
+            Opportunity opportunity
+    ) {
+        task.setUser(user);
+        task.setTitle(dto.title());
+        task.setDescription(dto.description());
+        task.setStatus(resolveTaskStatus(dto.taskStatus()));
+        task.setDueDate(dto.dueDate());
+        task.setLead(lead);
+        task.setOpportunity(opportunity);
+        task.setUpdatedAt(LocalDate.now());
+    }
+
+    private Lead resolveLead(Long leadId) {
+        if (leadId == null) {
+            return null;
+        }
+
+        return leadRepository.findById(leadId)
+                .orElseThrow(() -> new ObjectNotFoundException("Lead não encontrado. ID: " + leadId));
+    }
+
+    private Opportunity resolveOpportunity(Long opportunityId) {
+        if (opportunityId == null) {
+            return null;
+        }
+
+        return opportunityRepository.findById(opportunityId)
+                .orElseThrow(() -> new ObjectNotFoundException("Oportunidade não encontrada. ID: " + opportunityId));
+    }
+
+    private void ensureTaskHasExactlyOneCommercialLink(Lead lead, Opportunity opportunity) {
+        if (lead == null && opportunity == null) {
+            throw new BusinessRuleException("Toda tarefa deve estar vinculada a um Lead ou a uma Oportunidade.");
+        }
+
+        if (lead != null && opportunity != null) {
+            throw new BusinessRuleException("A tarefa não pode estar vinculada a um Lead e a uma Oportunidade ao mesmo tempo.");
+        }
+    }
+
+    private TaskStatus resolveTaskStatus(TaskStatus taskStatus) {
+        return taskStatus != null ? taskStatus : TaskStatus.PENDING;
+    }
+
     private Task findTaskById(Long id) {
-        return taskRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Task não encontrado. ID:" +id));
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Task não encontrada. ID: " + id));
     }
 }

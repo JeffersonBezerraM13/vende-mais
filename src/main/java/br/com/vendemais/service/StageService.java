@@ -6,17 +6,18 @@ import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.domain.entity.Stage;
 import br.com.vendemais.repository.PipelineRepository;
 import br.com.vendemais.repository.StageRepository;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.service.exceptions.BusinessRuleException;
+import br.com.vendemais.service.exceptions.DuplicateResourceException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
-import jakarta.validation.Valid;
+import br.com.vendemais.service.exceptions.ResourceInUseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Handles stage catalog operations inside pipelines so opportunity movement
- * follows a defined ordering.
+ * Manages pipeline stages, including their technical code, display name and
+ * position inside each sales funnel.
  */
 @Service
 @Transactional(readOnly = true)
@@ -25,119 +26,166 @@ public class StageService {
     private final StageRepository stageRepository;
     private final PipelineRepository pipelineRepository;
 
-    public StageService(StageRepository stageRepository,PipelineRepository pipelineRepository) {
+    public StageService(
+            StageRepository stageRepository,
+            PipelineRepository pipelineRepository
+    ) {
         this.stageRepository = stageRepository;
         this.pipelineRepository = pipelineRepository;
-    };
+    }
 
     /**
-     * Retrieves stages in pages so clients can browse the configured funnel
-     * checkpoints.
+     * Retrieves stages in pages so administrators can inspect funnel steps.
      *
      * @param pageable pagination and sorting instructions for the query
      * @return a page containing stage projections mapped to response DTOs
      */
     public Page<StageResponseDTO> findAll(Pageable pageable) {
-        return stageRepository.findAll(pageable).map(StageResponseDTO::daEntidade);
+        return stageRepository.findAll(pageable)
+                .map(StageResponseDTO::daEntidade);
     }
 
     /**
-     * Loads a single stage so clients can inspect its ordering and owning
-     * pipeline.
+     * Loads a stage by identifier.
      *
      * @param id identifier of the stage to retrieve
      * @return the requested stage mapped to the API response DTO
      * @throws ObjectNotFoundException if the stage does not exist
      */
     public StageResponseDTO findById(Long id) {
-        return StageResponseDTO.daEntidade(findStageById(id));
+        Stage stage = findStageById(id);
+        return StageResponseDTO.daEntidade(stage);
     }
 
     /**
-     * Creates a stage inside an existing pipeline and appends it to the pipeline
-     * stage collection.
+     * Creates a stage inside an existing pipeline after validating that its code
+     * and position are unique within that pipeline.
      *
      * @param dto payload describing the stage to create
      * @return the persisted stage mapped to the API response DTO
-     * @throws DataIntegrityViolationException if the referenced pipeline does not exist
+     * @throws ObjectNotFoundException if the referenced pipeline does not exist
+     * @throws DuplicateResourceException if the code or position already exists in the pipeline
      */
     @Transactional
-    public StageResponseDTO createStage(@Valid StageRequestDTO dto) {
-        try{
-            if (stageRepository.existsByPipelineIdAndPosition(dto.pipelineId(), dto.position())) {
-                throw new ObjectNotFoundException("Já existe uma etapa na posição " + dto.position() + " para este funil.");
-            }
+    public StageResponseDTO createStage(StageRequestDTO dto) {
+        Pipeline pipeline = findPipelineById(dto.pipelineId());
 
-            Pipeline pipeline = pipelineRepository.findById(dto.pipelineId())
-                    .orElseThrow(() -> new DataIntegrityViolationException("Funil não encontrado."));
+        String normalizedCode = normalizeCode(dto.code());
+        Integer position = dto.position();
 
-            Stage stage = new Stage(
-                    dto.name(),
-                    dto.code(),
-                    dto.position(),
-                    pipeline
-            );
+        ensureCodeAvailableForCreation(pipeline.getId(), normalizedCode);
+        ensurePositionAvailableForCreation(pipeline.getId(), position);
 
-            pipeline.addStage(stage);
+        Stage stage = new Stage(
+                normalizeName(dto.name()),
+                normalizedCode,
+                position,
+                pipeline
+        );
 
-            return StageResponseDTO.daEntidade(stageRepository.save(stage));
-        } catch (org.springframework.dao.DataIntegrityViolationException e){
-            throw new DataIntegrityViolationException("O código das etapas deve ser único globalmente.");
-        }
+        pipeline.addStage(stage);
 
+        return StageResponseDTO.daEntidade(stageRepository.save(stage));
     }
 
     /**
-     * Updates a stage only when it belongs to the informed pipeline, preventing
-     * cross-pipeline edits.
+     * Updates the display data of a stage while keeping its technical code
+     * immutable and ensuring the new position does not conflict inside the same
+     * pipeline.
      *
      * @param stageId identifier of the stage being updated
      * @param dto payload containing the revised stage data
-     * @return the persisted stage mapped to the API response DTO
-     * @throws ObjectNotFoundException if the stage does not belong to the informed pipeline
+     * @return the updated stage mapped to the API response DTO
+     * @throws ObjectNotFoundException if the pipeline or stage does not exist
+     * @throws DuplicateResourceException if another stage already uses the new position
+     * @throws BusinessRuleException if the request tries to change the stage code
      */
     @Transactional
-    public StageResponseDTO updateStage(Long stageId,@Valid StageRequestDTO dto) {
-        Stage stage = stageRepository.findByIdAndPipelineId(stageId, dto.pipelineId())
-                .orElseThrow(() -> new ObjectNotFoundException("Esse estágio não pertence a esse funil"));
+    public StageResponseDTO updateStage(Long stageId, StageRequestDTO dto) {
+        Pipeline pipeline = findPipelineById(dto.pipelineId());
+        Stage stage = findStageByIdAndPipelineId(stageId, pipeline.getId());
 
-        stage.setName(dto.name());
+        String normalizedCode = normalizeCode(dto.code());
+
+        ensureCodeWasNotChanged(stage, normalizedCode);
+        ensurePositionAvailableForUpdate(pipeline.getId(), stageId, dto.position());
+
+        stage.setName(normalizeName(dto.name()));
         stage.setPosition(dto.position());
 
         return StageResponseDTO.daEntidade(stageRepository.save(stage));
     }
 
     /**
-     * Deletes a specific stage, ensuring beforehand that it belongs to the informed pipeline.
+     * Deletes a stage from a pipeline when it is no longer part of the funnel
+     * configuration.
      *
-     * @param pipelineId the unique identifier of the pipeline.
-     * @param stageId the unique identifier of the stage to be deleted.
-     * @throws ObjectNotFoundException if the pipeline or the stage is not found in the database.
-     * @throws DataIntegrityViolationException if the stage is found but does not belong to the provided pipeline.
+     * @param pipelineId identifier of the pipeline that owns the stage
+     * @param stageId identifier of the stage to delete
+     * @throws ObjectNotFoundException if the pipeline or stage does not exist
+     * @throws ResourceInUseException if the stage is still referenced by opportunities
      */
     @Transactional
     public void deleteStage(Long pipelineId, Long stageId) {
-        Pipeline pipeline = pipelineRepository.findById(pipelineId)
-                .orElseThrow(() -> new ObjectNotFoundException("Pipeline não encontrada"));
+        Pipeline pipeline = findPipelineById(pipelineId);
+        Stage stage = findStageByIdAndPipelineId(stageId, pipeline.getId());
 
-        Stage stage = findStageById(stageId);
-
-        if(!pipeline.getId().equals(stage.getPipeline().getId())) {
-            throw new DataIntegrityViolationException("Essa etapa não pertence a esse pipeline");
+        try {
+            stageRepository.delete(stage);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new ResourceInUseException(
+                    "Você não pode apagar esta etapa pois ela está sendo utilizada em oportunidades.",
+                    ex
+            );
         }
-
-        stageRepository.delete(stage);
     }
 
-    /**
-     * Helper method to retrieve a stage by its unique identifier.
-     *
-     * @param id the unique identifier of the stage.
-     * @return the {@link Stage} entity corresponding to the provided ID.
-     * @throws ObjectNotFoundException if no stage is found with the provided ID.
-     */
+    private void ensureCodeAvailableForCreation(Long pipelineId, String code) {
+        if (stageRepository.existsByPipelineIdAndCodeIgnoreCase(pipelineId, code)) {
+            throw new DuplicateResourceException("Já existe uma etapa com este código neste funil.");
+        }
+    }
+
+    private void ensurePositionAvailableForCreation(Long pipelineId, Integer position) {
+        if (stageRepository.existsByPipelineIdAndPosition(pipelineId, position)) {
+            throw new DuplicateResourceException("Já existe uma etapa com esta posição neste funil.");
+        }
+    }
+
+    private void ensurePositionAvailableForUpdate(Long pipelineId, Long stageId, Integer position) {
+        if (stageRepository.existsByPipelineIdAndPositionAndIdNot(pipelineId, position, stageId)) {
+            throw new DuplicateResourceException("Já existe outra etapa com esta posição neste funil.");
+        }
+    }
+
+    private void ensureCodeWasNotChanged(Stage stage, String requestedCode) {
+        if (!stage.getCode().equalsIgnoreCase(requestedCode)) {
+            throw new BusinessRuleException("O código técnico da etapa não pode ser alterado após a criação.");
+        }
+    }
+
+    private String normalizeName(String name) {
+        return name == null ? null : name.trim();
+    }
+
+    private String normalizeCode(String code) {
+        return code == null ? null : code.trim().toUpperCase();
+    }
+
+    private Pipeline findPipelineById(Long id) {
+        return pipelineRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Pipeline não encontrado. ID: " + id));
+    }
+
     private Stage findStageById(Long id) {
         return stageRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("Stage não encontrado. ID: " + id));
+                .orElseThrow(() -> new ObjectNotFoundException("Stage não encontrada. ID: " + id));
+    }
+
+    private Stage findStageByIdAndPipelineId(Long stageId, Long pipelineId) {
+        return stageRepository.findByIdAndPipelineId(stageId, pipelineId)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        "Stage não encontrada neste pipeline. Stage ID: " + stageId + ", Pipeline ID: " + pipelineId
+                ));
     }
 }

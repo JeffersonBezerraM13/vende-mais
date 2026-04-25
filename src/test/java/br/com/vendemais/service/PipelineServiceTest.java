@@ -4,7 +4,8 @@ import br.com.vendemais.domain.dtos.pipeline.PipelineRequestDTO;
 import br.com.vendemais.domain.dtos.pipeline.PipelineResponseDTO;
 import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.repository.PipelineRepository;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.service.exceptions.DuplicateResourceException;
+import br.com.vendemais.service.exceptions.ResourceInUseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +34,7 @@ class PipelineServiceTest {
     void createShouldPersistPipelineWhenTitleIsUnique() {
         PipelineRequestDTO dto = new PipelineRequestDTO("Pipeline Comercial");
 
-        when(pipelineRepository.existsByTitle(dto.title())).thenReturn(false);
+        when(pipelineRepository.existsByTitleIgnoreCase(dto.title())).thenReturn(false);
         when(pipelineRepository.save(any(Pipeline.class))).thenAnswer(invocation -> {
             Pipeline saved = invocation.getArgument(0);
             setId(saved, 70L);
@@ -49,11 +50,11 @@ class PipelineServiceTest {
     @Test
     void createShouldRejectDuplicateTitle() {
         PipelineRequestDTO dto = new PipelineRequestDTO("Pipeline Comercial");
-        when(pipelineRepository.existsByTitle(dto.title())).thenReturn(true);
+        when(pipelineRepository.existsByTitleIgnoreCase(dto.title())).thenReturn(true);
 
         assertThatThrownBy(() -> pipelineService.create(dto))
-                .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessageContaining("Pipeline");
+                .isInstanceOf(DuplicateResourceException.class)
+                .hasMessageContaining("funil");
     }
 
     @Test
@@ -67,7 +68,7 @@ class PipelineServiceTest {
                 .delete(pipeline);
 
         assertThatThrownBy(() -> pipelineService.delete(10L))
-                .isInstanceOf(DataIntegrityViolationException.class)
+                .isInstanceOf(ResourceInUseException.class)
                 .hasMessageContaining("funil");
     }
 }

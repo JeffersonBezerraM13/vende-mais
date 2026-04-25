@@ -7,7 +7,8 @@ import br.com.vendemais.domain.entity.User;
 import br.com.vendemais.repository.UserRepository;
 import br.com.vendemais.repository.specification.UserSpecification;
 import br.com.vendemais.security.SecurityUtils;
-import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
+import br.com.vendemais.service.exceptions.BusinessRuleException;
+import br.com.vendemais.service.exceptions.DuplicateResourceException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,23 +16,21 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
- * Handles CRM user administration, including credential hashing and uniqueness
- * validation.
+ * Handles CRM user administration, including credential hashing, uniqueness
+ * validation, and account removal rules.
  */
 @Service
 @Transactional(readOnly = true)
 public class UserService {
 
-    private final UserRepository UserRepository;
-
+    private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
 
-    public UserService(UserRepository UserRepository, BCryptPasswordEncoder encoder) {
-        this.UserRepository = UserRepository;
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder encoder) {
+        this.userRepository = userRepository;
         this.encoder = encoder;
-    };
+    }
 
     /**
      * Retrieves CRM users in pages, applying optional filters so administrators can
@@ -42,12 +41,12 @@ public class UserService {
      * @return a page containing filtered user projections mapped to response DTOs
      */
     public Page<UserResponseDTO> findAll(UserFilterDTO filter, Pageable pageable) {
-        Page<User> paginaDeUsers = UserRepository.findAll(
+        Page<User> usersPage = userRepository.findAll(
                 UserSpecification.withFilters(filter),
                 pageable
         );
 
-        return paginaDeUsers.map(UserResponseDTO::daEntidade);
+        return usersPage.map(UserResponseDTO::daEntidade);
     }
 
     /**
@@ -59,50 +58,45 @@ public class UserService {
      * @throws ObjectNotFoundException if the user does not exist
      */
     public UserResponseDTO findById(Long id) {
-        User User = findUserById(id);
-        return UserResponseDTO.daEntidade(User);
+        User user = findUserById(id);
+        return UserResponseDTO.daEntidade(user);
     }
 
     /**
-     * Creates a CRM user account and hashes the provided password before
-     * persistence.
+     * Creates a CRM user account after validating email uniqueness and hashing
+     * the provided password before persistence.
      *
      * @param dto payload describing the account to provision
      * @return the persisted user mapped to the API response DTO
-     * @throws DataIntegrityViolationException if another account already uses the same email
+     * @throws DuplicateResourceException if another account already uses the same email
      */
     @Transactional
     public UserResponseDTO create(UserRequestDTO dto) {
-        if(existsByEmail(dto.email())){
-            throw new DataIntegrityViolationException("User já está cadastrado no sistema");
-        }
+        ensureEmailAvailableForCreation(dto.email());
 
-        User User = new User(
-                dto.name(),
-                dto.email(),
-                encoder.encode(dto.password())
-        );
+        User user = buildUser(dto);
 
-        return UserResponseDTO.daEntidade(UserRepository.save(User));
+        return UserResponseDTO.daEntidade(userRepository.save(user));
     }
 
     /**
-     * Updates a user account and re-hashes the supplied password before saving
-     * the new credentials.
+     * Updates a user account after validating email uniqueness and re-hashing the
+     * supplied password before saving the new credentials.
      *
      * @param id identifier of the user being updated
      * @param dto payload containing the revised account data
      * @return the persisted user mapped to the API response DTO
      * @throws ObjectNotFoundException if the user does not exist
+     * @throws DuplicateResourceException if the new email belongs to another account
      */
     @Transactional
     public UserResponseDTO update(Long id, UserRequestDTO dto) {
         User user = findUserById(id);
 
-        user.setEmail(dto.email());
-        user.setPassword(encoder.encode(dto.password()));
+        ensureEmailAvailableForUpdate(id, dto.email());
+        updateUserData(user, dto);
 
-        return UserResponseDTO.daEntidade(UserRepository.save(user));
+        return UserResponseDTO.daEntidade(userRepository.save(user));
     }
 
     /**
@@ -111,25 +105,59 @@ public class UserService {
      *
      * @param id identifier of the user to delete
      * @throws ObjectNotFoundException if the user does not exist
-     * @throws DataIntegrityViolationException if the authenticated user tries to delete their own account
+     * @throws BusinessRuleException if the authenticated user tries to delete their own account
      */
     @Transactional
     public void delete(Long id) {
+        User user = findUserById(id);
+
+        ensureLoggedUserIsNotDeletingOwnAccount(user);
+
+        userRepository.delete(user);
+    }
+
+    private User buildUser(UserRequestDTO dto) {
+        return new User(
+                dto.name(),
+                dto.email(),
+                encodePassword(dto.password())
+        );
+    }
+
+    private void updateUserData(User user, UserRequestDTO dto) {
+        user.setName(dto.name());
+        user.setEmail(dto.email());
+        user.setPassword(encodePassword(dto.password()));
+    }
+
+    private String encodePassword(String rawPassword) {
+        return encoder.encode(rawPassword);
+    }
+
+    private void ensureEmailAvailableForCreation(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new DuplicateResourceException("Já existe um usuário cadastrado com este e-mail.");
+        }
+    }
+
+    private void ensureEmailAvailableForUpdate(Long userId, String email) {
+        userRepository.findByEmail(email)
+                .filter(existingUser -> !existingUser.getId().equals(userId))
+                .ifPresent(existingUser -> {
+                    throw new DuplicateResourceException("Já existe outro usuário cadastrado com este e-mail.");
+                });
+    }
+
+    private void ensureLoggedUserIsNotDeletingOwnAccount(User targetUser) {
         User loggedUser = SecurityUtils.getLoggedUser();
 
-        if (loggedUser.getId().equals(id)) {
-            throw new DataIntegrityViolationException("Você não pode excluir a própria conta.");
+        if (loggedUser.getId().equals(targetUser.getId())) {
+            throw new BusinessRuleException("Você não pode excluir a própria conta.");
         }
-
-        User user = findUserById(id);
-        UserRepository.delete(user);
     }
 
     private User findUserById(Long id) {
-        return UserRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User não encontrado. ID:" +id));
-    }
-
-    private boolean existsByEmail(String email) {
-        return UserRepository.existsByEmail(email);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado. ID: " + id));
     }
 }

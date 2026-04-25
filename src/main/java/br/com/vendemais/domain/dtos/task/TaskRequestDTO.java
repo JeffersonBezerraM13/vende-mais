@@ -13,9 +13,6 @@ import java.time.LocalDate;
 @Schema(name = "TaskRequestDTO", description = "Payload para criacao ou atualizacao de tarefas.")
 public record TaskRequestDTO(
 
-        @NotNull(message = "Uma task deve ser vinculada a um usuário")
-        Long userId,
-
         @NotBlank(message = "Uma task deve ter um nome")
         @Schema(example = "Ligar para Bob Blue")
         String title,
