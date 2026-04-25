@@ -6,6 +6,7 @@ import br.com.vendemais.domain.dtos.user.UserResponseDTO;
 import br.com.vendemais.domain.entity.User;
 import br.com.vendemais.repository.UserRepository;
 import br.com.vendemais.repository.specification.UserSpecification;
+import br.com.vendemais.security.SecurityUtils;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
@@ -105,13 +106,21 @@ public class UserService {
     }
 
     /**
-     * Deletes a CRM user account when access must be revoked permanently.
+     * Deletes a CRM user account when access must be revoked permanently, while
+     * preventing the authenticated administrator from deleting their own account.
      *
      * @param id identifier of the user to delete
      * @throws ObjectNotFoundException if the user does not exist
+     * @throws DataIntegrityViolationException if the authenticated user tries to delete their own account
      */
     @Transactional
-    public void delete(Long id){
+    public void delete(Long id) {
+        User loggedUser = SecurityUtils.getLoggedUser();
+
+        if (loggedUser.getId().equals(id)) {
+            throw new DataIntegrityViolationException("Você não pode excluir a própria conta.");
+        }
+
         User user = findUserById(id);
         UserRepository.delete(user);
     }
