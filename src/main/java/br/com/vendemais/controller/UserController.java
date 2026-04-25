@@ -2,6 +2,7 @@ package br.com.vendemais.controller;
 
 import br.com.vendemais.controller.exceptions.StandardError;
 import br.com.vendemais.controller.exceptions.ValidationError;
+import br.com.vendemais.domain.dtos.user.UserFilterDTO;
 import br.com.vendemais.domain.dtos.user.UserRequestDTO;
 import br.com.vendemais.domain.dtos.user.UserResponseDTO;
 import br.com.vendemais.service.UserService;
@@ -46,23 +47,26 @@ public class UserController {
     }
 
     /**
-     * Returns a paged list of CRM users so administrators can manage the access
-     * base without loading all accounts at once.
+     * Returns a paged and filtered list of CRM users so administrators can search
+     * accounts by name, email or role without client-side array filtering.
      *
+     * @param filter optional search and role filtering criteria
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing user summaries
+     * @return a page containing filtered user summaries
      */
     @GetMapping
-    @Operation(summary = "Lista os usuarios de forma paginada")
+    @Operation(summary = "Lista os usuarios de forma paginada e filtrada")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuarios recuperados com sucesso.")
     })
     public ResponseEntity<Page<UserResponseDTO>> findAll(
-            // Se o front-end não mandar nada, por padrão:
-            // Traz a página 0, com 10 itens, ordenado pelo 'id' do mais novo pro mais velho
+            @Valid @ParameterObject UserFilterDTO filter,
+
             @ParameterObject
-            @PageableDefault(page = 0,size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
-        Page<UserResponseDTO> page = userService.findAll(pageable);
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ) {
+        Page<UserResponseDTO> page = userService.findAll(filter, pageable);
         return ResponseEntity.ok(page);
     }
 

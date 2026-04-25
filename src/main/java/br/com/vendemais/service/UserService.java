@@ -1,9 +1,11 @@
 package br.com.vendemais.service;
 
+import br.com.vendemais.domain.dtos.user.UserFilterDTO;
 import br.com.vendemais.domain.dtos.user.UserRequestDTO;
 import br.com.vendemais.domain.dtos.user.UserResponseDTO;
 import br.com.vendemais.domain.entity.User;
 import br.com.vendemais.repository.UserRepository;
+import br.com.vendemais.repository.specification.UserSpecification;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
@@ -31,14 +33,18 @@ public class UserService {
     };
 
     /**
-     * Retrieves CRM users in pages so administrators can inspect the access base
-     * efficiently.
+     * Retrieves CRM users in pages, applying optional filters so administrators can
+     * search the access base directly by the backend.
      *
+     * @param filter optional filtering criteria, such as search term and role
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing user projections mapped to response DTOs
+     * @return a page containing filtered user projections mapped to response DTOs
      */
-    public Page<UserResponseDTO> findAll(Pageable pageable) {
-        Page<User> paginaDeUsers = UserRepository.findAll(pageable);
+    public Page<UserResponseDTO> findAll(UserFilterDTO filter, Pageable pageable) {
+        Page<User> paginaDeUsers = UserRepository.findAll(
+                UserSpecification.withFilters(filter),
+                pageable
+        );
 
         return paginaDeUsers.map(UserResponseDTO::daEntidade);
     }
