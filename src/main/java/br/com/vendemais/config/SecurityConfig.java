@@ -89,6 +89,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_MATCHES).permitAll()
+                        .requestMatchers("/integrations/marketing/leads/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)

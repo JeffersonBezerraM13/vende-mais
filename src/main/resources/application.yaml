@@ -2,7 +2,7 @@ spring:
   config:
     import: "optional:file:.env[.properties]"
   application:
-    name: demo
+    name: vende-mais-back
 
   profiles:
     active: ${SPRING_PROFILES_ACTIVE}
@@ -25,3 +25,12 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+
+vende:
+  mais:
+    integration:
+      random:
+        user:
+          api:
+            url: ${RANDOM_USER_API_URL:https://randomuser.me}
+            path: ${RANDOM_USER_API_PATH:/api/}

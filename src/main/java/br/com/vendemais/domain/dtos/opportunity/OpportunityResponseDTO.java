@@ -34,7 +34,7 @@ public record OpportunityResponseDTO(
         @Schema(example = "2026-04-24")
         LocalDate expectedCloseDate,
         @Schema(example = "2026-04-25")
-        LocalDate closeDate,
+        LocalDate closedAt,
         @Schema(example = "Blue Corp adiou a contratacao para o proximo trimestre.")
         String lossReason,
         @Schema(example = "Blue Corp precisa de 4 posicoes fixas e sala de reuniao duas vezes por semana.")

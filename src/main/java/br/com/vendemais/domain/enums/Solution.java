@@ -5,5 +5,6 @@ public enum Solution {
     COWORKING,
     FISCAL_ADDRESS,
     COMMERCIAL_ADDRESS,
-    AUDITORIUM
+    AUDITORIUM,
+    NOT_SPECIFIED
 }

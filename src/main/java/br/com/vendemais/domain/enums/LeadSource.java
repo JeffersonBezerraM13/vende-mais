@@ -5,5 +5,6 @@ public enum LeadSource {
     WHATSAPP,
     PHONE_CALL,
     REFERRAL,
-    IN_PERSON
+    IN_PERSON,
+    MARKETING_INTEGRATION
 }
