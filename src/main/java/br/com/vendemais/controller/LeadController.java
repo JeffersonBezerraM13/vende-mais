@@ -2,6 +2,7 @@ package br.com.vendemais.controller;
 
 import br.com.vendemais.controller.exceptions.StandardError;
 import br.com.vendemais.controller.exceptions.ValidationError;
+import br.com.vendemais.domain.dtos.lead.LeadFilterDTO;
 import br.com.vendemais.domain.dtos.lead.LeadRequestDTO;
 import br.com.vendemais.domain.dtos.lead.LeadResponseDTO;
 import br.com.vendemais.service.LeadService;
@@ -58,11 +59,13 @@ public class LeadController {
             @ApiResponse(responseCode = "200", description = "Leads recuperados com sucesso.")
     })
     public ResponseEntity<Page<LeadResponseDTO>> findAll(
-            // Se o front-end não mandar nada, por padrão:
-            // Traz a página 0, com 10 itens, ordenado pelo 'createdAt' do mais novo pro mais velho
+            @Valid @ParameterObject LeadFilterDTO filter,
+
             @ParameterObject
-            @PageableDefault(page = 0,size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
-        Page<LeadResponseDTO> page = leadService.findAll(pageable);
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        Page<LeadResponseDTO> page = leadService.findAll(filter, pageable);
         return ResponseEntity.ok(page);
     }
 

@@ -1,10 +1,12 @@
 package br.com.vendemais.service;
 
+import br.com.vendemais.domain.dtos.lead.LeadFilterDTO;
 import br.com.vendemais.domain.dtos.lead.LeadRequestDTO;
 import br.com.vendemais.domain.dtos.lead.LeadResponseDTO;
 import br.com.vendemais.domain.entity.Lead;
 import br.com.vendemais.repository.LeadRepository;
 
+import br.com.vendemais.repository.specification.LeadSpecification;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
@@ -29,14 +31,20 @@ public class LeadService {
     };
 
     /**
-     * Retrieves leads in pages so prospect lists can be rendered efficiently in
-     * the CRM.
+     * Retrieves leads in pages, applying optional filters so prospect lists can be
+     * searched and narrowed directly by the backend instead of being filtered in
+     * memory by the client application.
      *
+     * @param filter optional filtering criteria, such as search term, person type
+     *               and lead source
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing lead projections mapped to response DTOs
+     * @return a page containing filtered lead projections mapped to response DTOs
      */
-    public Page<LeadResponseDTO> findAll(Pageable pageable) {
-        Page<Lead> paginaDeLeads = leadRepository.findAll(pageable);
+    public Page<LeadResponseDTO> findAll(LeadFilterDTO filter, Pageable pageable) {
+        Page<Lead> paginaDeLeads = leadRepository.findAll(
+                LeadSpecification.withFilters(filter),
+                pageable
+        );
 
         return paginaDeLeads.map(LeadResponseDTO::daEntidade);
     }

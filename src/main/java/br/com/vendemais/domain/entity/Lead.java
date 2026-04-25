@@ -119,7 +119,7 @@ public class Lead {
     }
 
     public void setCompanyName(String companyName) {
-        companyName = companyName;
+        this.companyName = companyName;
     }
 
     public Solution getInterestSolution() {
