@@ -1,6 +1,7 @@
 package br.com.vendemais.service;
 
 import br.com.vendemais.domain.dtos.opportunity.OpportunityCloseDTO;
+import br.com.vendemais.domain.dtos.opportunity.OpportunityFilterDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityRequestDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityResponseDTO;
 import br.com.vendemais.domain.entity.Lead;
@@ -8,6 +9,7 @@ import br.com.vendemais.domain.entity.Opportunity;
 import br.com.vendemais.domain.entity.Pipeline;
 import br.com.vendemais.domain.entity.Stage;
 import br.com.vendemais.repository.*;
+import br.com.vendemais.repository.specification.OpportunitySpecification;
 import br.com.vendemais.service.exceptions.DataIntegrityViolationException;
 import br.com.vendemais.service.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
@@ -47,14 +49,19 @@ public class OpportunityService {
     }
 
     /**
-     * Retrieves opportunities in pages so pipeline and portfolio screens can be
-     * rendered efficiently.
+     * Retrieves opportunities in pages, applying optional filters so pipeline and
+     * portfolio screens can be searched and narrowed directly by the backend.
      *
+     * @param filter optional filtering criteria, such as search term, virtual status
+     *               and pipeline identifier
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing opportunity projections mapped to response DTOs
+     * @return a page containing filtered opportunity projections mapped to response DTOs
      */
-    public Page<OpportunityResponseDTO> findAll(Pageable pageable) {
-        Page<Opportunity> paginaDeOpportunitys = opportunityRepository.findAll(pageable);
+    public Page<OpportunityResponseDTO> findAll(OpportunityFilterDTO filter, Pageable pageable) {
+        Page<Opportunity> paginaDeOpportunitys = opportunityRepository.findAll(
+                OpportunitySpecification.withFilters(filter),
+                pageable
+        );
 
         return paginaDeOpportunitys.map(OpportunityResponseDTO::daEntidade);
     }

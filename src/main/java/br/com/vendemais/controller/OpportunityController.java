@@ -3,6 +3,7 @@ package br.com.vendemais.controller;
 import br.com.vendemais.controller.exceptions.StandardError;
 import br.com.vendemais.controller.exceptions.ValidationError;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityCloseDTO;
+import br.com.vendemais.domain.dtos.opportunity.OpportunityFilterDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityRequestDTO;
 import br.com.vendemais.domain.dtos.opportunity.OpportunityResponseDTO;
 import br.com.vendemais.service.OpportunityService;
@@ -47,23 +48,26 @@ public class OpportunityController {
     }
 
     /**
-     * Returns a paged list of opportunities so kanban boards and portfolio views
-     * can be rendered efficiently.
+     * Returns a paged and filtered list of opportunities so kanban boards and
+     * portfolio views can be rendered without client-side array filtering.
      *
+     * @param filter optional search, status, and pipeline filtering criteria
      * @param pageable pagination and sorting instructions for the query
-     * @return a page containing opportunity summaries
+     * @return a page containing filtered opportunity summaries
      */
     @GetMapping
-    @Operation(summary = "Lista as oportunidades de forma paginada")
+    @Operation(summary = "Lista as oportunidades de forma paginada e filtrada")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Oportunidades recuperadas com sucesso.")
     })
     public ResponseEntity<Page<OpportunityResponseDTO>> findAll(
-            // Se o front-end não mandar nada, por padrão:
-            // Traz a página 0, com 10 itens, ordenado pelo 'createdAt' do mais novo pro mais velho
+            @Valid @ParameterObject OpportunityFilterDTO filter,
+
             @ParameterObject
-            @PageableDefault(page = 0,size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
-        Page<OpportunityResponseDTO> page = opportunityService.findAll(pageable);
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        Page<OpportunityResponseDTO> page = opportunityService.findAll(filter, pageable);
         return ResponseEntity.ok(page);
     }
 
