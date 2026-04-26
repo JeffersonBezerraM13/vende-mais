@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
  * Carries the credentials submitted to the public login endpoint in exchange for
  * a JWT.
  */
-@Schema(name = "CredentialsDTO", description = "Credenciais utilizadas no endpoint publico de login.")
+@Schema(name = "CredentialsDTO", description = "Credenciais utilizadas no endpoint público de login.")
 public record CredentialsDTO(
         @Schema(example = "einstein@gmail.com")
         @NotBlank(message = "Email é obrigatório")

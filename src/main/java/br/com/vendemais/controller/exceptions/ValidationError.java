@@ -9,7 +9,7 @@ import java.util.List;
  * Extends the standard API error payload with field-level violations produced by
  * request validation.
  */
-@Schema(name = "ValidationError", description = "Formato de erro retornado quando o payload da requisicao e invalido.")
+@Schema(name = "ValidationError", description = "Formato de erro retornado quando o payload da requisição é inválido.")
 public class ValidationError extends StandardError{
 
     @Schema(example = "[{\"fieldName\":\"email\",\"message\":\"Formato de email inválido\"}]")

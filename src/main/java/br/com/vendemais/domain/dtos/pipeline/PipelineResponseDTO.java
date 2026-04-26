@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * Represents a pipeline together with its ordered stage structure as exposed by
  * the API.
  */
-@Schema(name = "PipelineResponseDTO", description = "Representacao de pipeline retornada pela API.")
+@Schema(name = "PipelineResponseDTO", description = "Representação de pipeline retornada pela API.")
 public record PipelineResponseDTO(
         @Schema(example = "1")
         Long id,

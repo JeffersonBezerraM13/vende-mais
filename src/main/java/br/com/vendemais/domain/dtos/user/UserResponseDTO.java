@@ -9,7 +9,7 @@ import java.util.Set;
  * Represents a CRM user account as exposed by administrative and profile
  * endpoints.
  */
-@Schema(name = "UserResponseDTO", description = "Representacao de usuario retornada pela API.")
+@Schema(name = "UserResponseDTO", description = "Representação de usuário retornada pela API.")
 public record UserResponseDTO(
         @Schema(example = "3")
         Long id,

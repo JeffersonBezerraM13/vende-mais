@@ -10,14 +10,14 @@ import java.time.LocalDate;
  * Captures the information required to schedule or update a follow-up task
  * linked to a lead or opportunity.
  */
-@Schema(name = "TaskRequestDTO", description = "Payload para criacao ou atualizacao de tarefas.")
+@Schema(name = "TaskRequestDTO", description = "Payload para criação ou atualização de tarefas.")
 public record TaskRequestDTO(
 
         @NotBlank(message = "Uma task deve ter um nome")
         @Schema(example = "Ligar para Bob Blue")
         String title,
 
-        @Schema(example = "Validar a urgencia da Blue Corp para contratar Coworking.")
+        @Schema(example = "Validar a urgência da Blue Corp para contratar Coworking.")
         String description,
         @Schema(example = "PENDING")
         TaskStatus taskStatus,

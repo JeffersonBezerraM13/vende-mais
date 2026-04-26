@@ -36,7 +36,7 @@ import java.net.URI;
  */
 @RestController
 @RequestMapping("/users")
-@Tag(name = "Users", description = "Gestao de usuarios do CRM e seus perfis de acesso.")
+@Tag(name = "Users", description = "Gestão de usuários do CRM e seus perfis de acesso.")
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
@@ -55,9 +55,9 @@ public class UserController {
      * @return a page containing filtered user summaries
      */
     @GetMapping
-    @Operation(summary = "Lista os usuarios de forma paginada e filtrada")
+    @Operation(summary = "Lista os usuários de forma paginada e filtrada")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuarios recuperados com sucesso.")
+            @ApiResponse(responseCode = "200", description = "Usuários recuperados com sucesso.")
     })
     public ResponseEntity<Page<UserResponseDTO>> findAll(
             @Valid @ParameterObject UserFilterDTO filter,
@@ -79,16 +79,16 @@ public class UserController {
      * @throws ObjectNotFoundException if the user does not exist
      */
     @GetMapping("/{id}")
-    @Operation(summary = "Busca um usuario por ID")
+    @Operation(summary = "Busca um usuário por ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuario recuperado com sucesso."),
+            @ApiResponse(responseCode = "200", description = "Usuário recuperado com sucesso."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Usuario nao encontrado.",
+                    description = "Usuário não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
-    public ResponseEntity<UserResponseDTO> findById(@Parameter(description = "ID do usuario") @PathVariable Long id){
+    public ResponseEntity<UserResponseDTO> findById(@Parameter(description = "ID do usuário") @PathVariable Long id){
         UserResponseDTO userResponseDTO = userService.findById(id);
         return ResponseEntity.ok().body(userResponseDTO);
     }
@@ -102,15 +102,15 @@ public class UserController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    @Operation(summary = "Cria um novo usuario")
+    @Operation(summary = "Cria um novo usuário")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Usuario criado com sucesso."),
+            @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para criacao do usuario.",
+                    description = "Payload inválido para criação do usuário.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Acesso negado para criar usuarios.")
+            @ApiResponse(responseCode = "403", description = "Acesso negado para criar usuários.")
     })
     public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserRequestDTO dto){
         UserResponseDTO userResponseDTO = userService.create(dto);
@@ -136,23 +136,23 @@ public class UserController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    @Operation(summary = "Atualiza um usuario existente")
+    @Operation(summary = "Atualiza um usuário existente")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuario atualizado com sucesso."),
+            @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para atualizacao do usuario.",
+                    description = "Payload inválido para atualização do usuário.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Acesso negado para atualizar usuarios."),
+            @ApiResponse(responseCode = "403", description = "Acesso negado para atualizar usuários."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Usuario nao encontrado.",
+                    description = "Usuário não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
     public ResponseEntity<UserResponseDTO> update(
-            @Parameter(description = "ID do usuario") @PathVariable Long id,
+            @Parameter(description = "ID do usuário") @PathVariable Long id,
             @RequestBody @Valid UserRequestDTO dto
     ){
         return ResponseEntity.ok(userService.update(id, dto));
@@ -167,17 +167,17 @@ public class UserController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    @Operation(summary = "Remove um usuario")
+    @Operation(summary = "Remove um usuário")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Usuario removido com sucesso."),
-            @ApiResponse(responseCode = "403", description = "Acesso negado para remover usuarios."),
+            @ApiResponse(responseCode = "204", description = "Usuário removido com sucesso."),
+            @ApiResponse(responseCode = "403", description = "Acesso negado para remover usuários."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Usuario nao encontrado.",
+                    description = "Usuário não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
-    public ResponseEntity<Void> deleteById(@Parameter(description = "ID do usuario") @PathVariable Long id) {
+    public ResponseEntity<Void> deleteById(@Parameter(description = "ID do usuário") @PathVariable Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }

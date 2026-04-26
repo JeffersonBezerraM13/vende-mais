@@ -7,11 +7,11 @@ import jakarta.validation.constraints.Size;
 /**
  * Represents optional filtering criteria used to search and narrow opportunity listings.
  */
-@Schema(name = "OpportunityFilterDTO", description = "Parametros opcionais para filtragem da listagem de oportunidades.")
+@Schema(name = "OpportunityFilterDTO", description = "Parâmetros opcionais para filtragem da listagem de oportunidades.")
 public record OpportunityFilterDTO(
         @Size(max = 120, message = "O termo de busca deve ter no máximo 120 caracteres")
         @Schema(
-                description = "Termo usado para buscar oportunidades por lead, titulo, funil, etapa ou observacoes.",
+                description = "Termo usado para buscar oportunidades por lead, título, funil, etapa ou observações.",
                 example = "Ana"
         )
         String search,

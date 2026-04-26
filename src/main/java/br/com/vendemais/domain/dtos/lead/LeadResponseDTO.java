@@ -9,7 +9,7 @@ import java.time.LocalDate;
  * Summarizes lead data returned to clients when prospect information is queried
  * from the CRM.
  */
-@Schema(name = "LeadResponseDTO", description = "Representacao de lead retornada pela API.")
+@Schema(name = "LeadResponseDTO", description = "Representação de lead retornada pela API.")
 public record LeadResponseDTO(
         @Schema(example = "2")
         Long id,
@@ -29,7 +29,7 @@ public record LeadResponseDTO(
         LeadSource leadSource,
         @Schema(example = "MANUAL")
         EntryMethod entryMethod,
-        @Schema(example = "Busca 4 posicoes de coworking e sala de reuniao para atender clientes presencialmente.")
+        @Schema(example = "Busca 4 posições de coworking e sala de reunião para atender clientes presencialmente.")
         String notes,
         @Schema(example = "2026-04-09")
         LocalDate createdAt,

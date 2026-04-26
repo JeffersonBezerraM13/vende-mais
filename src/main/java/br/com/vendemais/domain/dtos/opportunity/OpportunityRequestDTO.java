@@ -14,7 +14,7 @@ import java.time.LocalDate;
  * Captures the payload required to register or revise an opportunity inside a
  * pipeline.
  */
-@Schema(name = "OpportunityRequestDTO", description = "Payload para criacao ou atualizacao de oportunidades.")
+@Schema(name = "OpportunityRequestDTO", description = "Payload para criação ou atualização de oportunidades.")
 public record OpportunityRequestDTO(
         @NotNull(message = "O ID do Lead é obrigatório")
         @Schema(example = "2")
@@ -41,6 +41,6 @@ public record OpportunityRequestDTO(
         @Schema(example = "2026-04-24")
         LocalDate expectedCloseDate,
 
-        @Schema(example = "Blue Corp precisa de 4 posicoes fixas e sala de reuniao duas vezes por semana.")
+        @Schema(example = "Blue Corp precisa de 4 posições fixas e sala de reunião duas vezes por semana.")
         String notes
 ) {}

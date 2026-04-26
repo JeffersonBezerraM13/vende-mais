@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Represents the standard API error payload returned when a CRM request fails
  * outside field-level validation scenarios.
  */
-@Schema(name = "StandardError", description = "Formato padrao de erro retornado pela API.")
+@Schema(name = "StandardError", description = "Formato padrão de erro retornado pela API.")
 public class StandardError  {
     @Schema(example = "1712678400000")
     private Long timestamp;

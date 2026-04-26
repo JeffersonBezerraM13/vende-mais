@@ -11,7 +11,7 @@ import java.time.LocalDate;
  * Represents the pipeline, stage, and commercial data returned for a tracked
  * opportunity.
  */
-@Schema(name = "OpportunityResponseDTO", description = "Representacao de oportunidade retornada pela API.")
+@Schema(name = "OpportunityResponseDTO", description = "Representação de oportunidade retornada pela API.")
 public record OpportunityResponseDTO(
         @Schema(example = "2")
         Long id,
@@ -35,9 +35,9 @@ public record OpportunityResponseDTO(
         LocalDate expectedCloseDate,
         @Schema(example = "2026-04-25")
         LocalDate closedAt,
-        @Schema(example = "Blue Corp adiou a contratacao para o proximo trimestre.")
+        @Schema(example = "Blue Corp adiou a contratação para o próximo trimestre.")
         String lossReason,
-        @Schema(example = "Blue Corp precisa de 4 posicoes fixas e sala de reuniao duas vezes por semana.")
+        @Schema(example = "Blue Corp precisa de 4 posições fixas e sala de reunião duas vezes por semana.")
         String notes,
         @Schema(example = "2026-04-09")
         LocalDate createdAt,

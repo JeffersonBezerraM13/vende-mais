@@ -72,7 +72,7 @@ public class StageController {
             @ApiResponse(responseCode = "200", description = "Etapa recuperada com sucesso."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Etapa nao encontrada.",
+                    description = "Etapa não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })

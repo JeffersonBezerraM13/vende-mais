@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 /**
  * Represents optional filtering criteria used to search and narrow lead listings.
  */
-@Schema(name = "LeadFilterDTO", description = "Parametros opcionais para filtragem da listagem de leads.")
+@Schema(name = "LeadFilterDTO", description = "Parâmetros opcionais para filtragem da listagem de leads.")
 public record LeadFilterDTO(
         @Size(max = 120, message = "O termo de busca deve ter no máximo 120 caracteres")
         @Schema(

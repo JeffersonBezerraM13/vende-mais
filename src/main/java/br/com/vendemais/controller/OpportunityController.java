@@ -37,7 +37,7 @@ import java.net.URI;
  */
 @RestController
 @RequestMapping("/opportunities")
-@Tag(name = "Opportunities", description = "Gestao de oportunidades vinculadas ao funil de vendas.")
+@Tag(name = "Opportunities", description = "Gestão de oportunidades vinculadas ao funil de vendas.")
 @SecurityRequirement(name = "bearerAuth")
 public class OpportunityController {
 
@@ -85,7 +85,7 @@ public class OpportunityController {
             @ApiResponse(responseCode = "200", description = "Oportunidade recuperada com sucesso."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Oportunidade nao encontrada.",
+                    description = "Oportunidade não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -105,7 +105,7 @@ public class OpportunityController {
     @GetMapping("/check-open")
     @Operation(summary = "Verifica se o lead possui oportunidades abertas")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Verificacao executada com sucesso.")
+            @ApiResponse(responseCode = "200", description = "Verificação executada com sucesso.")
     })
     public ResponseEntity<Boolean> hasOpenOpportunities(@Parameter(description = "ID do lead") @RequestParam Long leadId) {
         boolean hasOpen = opportunityService.hasOpenOpportunities(leadId);
@@ -126,7 +126,7 @@ public class OpportunityController {
             @ApiResponse(responseCode = "201", description = "Oportunidade criada com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para criacao da oportunidade.",
+                    description = "Payload inválido para criação da oportunidade.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             )
     })
@@ -159,12 +159,12 @@ public class OpportunityController {
             @ApiResponse(responseCode = "200", description = "Oportunidade atualizada com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para atualizacao da oportunidade.",
+                    description = "Payload inválido para atualização da oportunidade.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Oportunidade nao encontrada.",
+                    description = "Oportunidade não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -191,12 +191,12 @@ public class OpportunityController {
             @ApiResponse(responseCode = "200", description = "Oportunidade fechada com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para fechamento da oportunidade.",
+                    description = "Payload inválido para fechamento da oportunidade.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Oportunidade nao encontrada.",
+                    description = "Oportunidade não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -223,7 +223,7 @@ public class OpportunityController {
             @ApiResponse(responseCode = "403", description = "Acesso negado para remover oportunidades."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Oportunidade nao encontrada.",
+                    description = "Oportunidade não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })

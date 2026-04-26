@@ -39,7 +39,7 @@ import java.net.URI;
  */
 @RestController
 @RequestMapping("/pipelines")
-@Tag(name = "Pipelines", description = "Configuracao dos funis comerciais e de suas etapas.")
+@Tag(name = "Pipelines", description = "Configuração dos funis comerciais e de suas etapas.")
 @SecurityRequirement(name = "bearerAuth")
 public class PipelineController {
 
@@ -90,7 +90,7 @@ public class PipelineController {
             @ApiResponse(responseCode = "200", description = "Pipeline recuperado com sucesso."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Pipeline nao encontrado.",
+                    description = "Pipeline não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -114,7 +114,7 @@ public class PipelineController {
             @ApiResponse(responseCode = "201", description = "Pipeline criado com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para criacao do pipeline.",
+                    description = "Payload inválido para criação do pipeline.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
             @ApiResponse(responseCode = "403", description = "Acesso negado para criar pipelines.")
@@ -147,13 +147,13 @@ public class PipelineController {
             @ApiResponse(responseCode = "200", description = "Etapa criada com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para criacao da etapa.",
+                    description = "Payload inválido para criação da etapa.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
             @ApiResponse(responseCode = "403", description = "Acesso negado para criar etapas."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Pipeline nao encontrado.",
+                    description = "Pipeline não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -177,13 +177,13 @@ public class PipelineController {
             @ApiResponse(responseCode = "200", description = "Pipeline atualizado com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para atualizacao do pipeline.",
+                    description = "Payload inválido para atualização do pipeline.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
             @ApiResponse(responseCode = "403", description = "Acesso negado para atualizar pipelines."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Pipeline nao encontrado.",
+                    description = "Pipeline não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -211,13 +211,13 @@ public class PipelineController {
             @ApiResponse(responseCode = "200", description = "Etapa atualizada com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para atualizacao da etapa.",
+                    description = "Payload inválido para atualização da etapa.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
             @ApiResponse(responseCode = "403", description = "Acesso negado para atualizar etapas."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Etapa nao encontrada.",
+                    description = "Etapa não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -244,7 +244,7 @@ public class PipelineController {
             @ApiResponse(responseCode = "403", description = "Acesso negado para remover pipelines."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Pipeline nao encontrado.",
+                    description = "Pipeline não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })

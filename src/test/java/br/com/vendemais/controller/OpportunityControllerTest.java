@@ -107,14 +107,14 @@ class OpportunityControllerTest extends ControllerTestSupport {
         );
 
         when(opportunityService.create(any(OpportunityRequestDTO.class)))
-                .thenThrow(new BusinessRuleException("A etapa informada nao pertence ao pipeline selecionado."));
+                .thenThrow(new BusinessRuleException("A etapa informada não pertence ao pipeline selecionado."));
 
         mockMvc.perform(post("/opportunities")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.status").value(422))
-                .andExpect(jsonPath("$.message").value("A etapa informada nao pertence ao pipeline selecionado."));
+                .andExpect(jsonPath("$.message").value("A etapa informada não pertence ao pipeline selecionado."));
     }
 
     @Test

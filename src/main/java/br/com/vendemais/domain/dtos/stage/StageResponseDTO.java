@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Represents an ordered pipeline stage returned to clients configuring or
  * visualizing funnel structure.
  */
-@Schema(name = "StageResponseDTO", description = "Representacao de etapa retornada pela API.")
+@Schema(name = "StageResponseDTO", description = "Representação de etapa retornada pela API.")
 public record StageResponseDTO(
         @Schema(example = "3")
         Long id,
-        @Schema(example = "Qualificacao")
+        @Schema(example = "Qualificação")
         String name,
         @Schema(example = "QUALIFICACAO")
         String code,

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Autenticacao", description = "Operacoes relacionadas ao login e ao contexto do usuario autenticado.")
+@Tag(name = "Autenticação", description = "Operações relacionadas ao login e ao contexto do usuário autenticado.")
 @SecurityRequirement(name = "bearerAuth")
 public class AuthController {
 
@@ -42,12 +42,12 @@ public class AuthController {
      * @throws ObjectNotFoundException if the authenticated principal no longer exists in persistence
      */
     @GetMapping("/me")
-    @Operation(summary = "Retorna o usuario autenticado")
+    @Operation(summary = "Retorna o usuário autenticado")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuario autenticado recuperado com sucesso."),
+            @ApiResponse(responseCode = "200", description = "Usuário autenticado recuperado com sucesso."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Usuario autenticado nao encontrado.",
+                    description = "Usuário autenticado não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })

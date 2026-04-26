@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 /**
  * Captures the data required to provision or update a CRM user account.
  */
-@Schema(name = "UserRequestDTO", description = "Payload para criacao ou atualizacao de usuarios.")
+@Schema(name = "UserRequestDTO", description = "Payload para criação ou atualização de usuários.")
 public record UserRequestDTO(
         @NotBlank(message = "O nome não pode ser vazio")
         @Schema(example = "Marie Curie")

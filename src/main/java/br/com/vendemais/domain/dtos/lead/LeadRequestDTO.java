@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 /**
  * Captures the data required to create or update a lead in the CRM.
  */
-@Schema(name = "LeadRequestDTO", description = "Payload para criacao ou atualizacao de leads.")
+@Schema(name = "LeadRequestDTO", description = "Payload para criação ou atualização de leads.")
 public record LeadRequestDTO(
         @NotBlank(message = "Nome não pode ser vazio")
         @Schema(example = "Bob Blue")
@@ -40,6 +40,6 @@ public record LeadRequestDTO(
         @Schema(example = "MANUAL")
         EntryMethod entryMethod,
 
-        @Schema(example = "Busca 4 posicoes de coworking e sala de reuniao para atender clientes presencialmente.")
+        @Schema(example = "Busca 4 posições de coworking e sala de reunião para atender clientes presencialmente.")
         String notes
 ) {}

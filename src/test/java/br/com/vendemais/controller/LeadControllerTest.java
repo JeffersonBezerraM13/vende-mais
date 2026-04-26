@@ -92,11 +92,11 @@ class LeadControllerTest extends ControllerTestSupport {
 
     @Test
     void findByIdShouldReturn404WhenLeadDoesNotExist() throws Exception {
-        when(leadService.findById(99L)).thenThrow(new ObjectNotFoundException("Lead nao encontrado"));
+        when(leadService.findById(99L)).thenThrow(new ObjectNotFoundException("Lead não encontrado"));
 
         mockMvc.perform(get("/leads/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("Lead nao encontrado"));
+                .andExpect(jsonPath("$.message").value("Lead não encontrado"));
     }
 }

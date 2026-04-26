@@ -48,7 +48,7 @@ public class MarketingLeadIntegrationController {
             @ApiResponse(responseCode = "200", description = "Leads importados com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para importacao de leads.",
+                    description = "Payload inválido para importação de leads.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             )
     })

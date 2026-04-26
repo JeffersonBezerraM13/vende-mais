@@ -83,7 +83,7 @@ public class LeadController {
             @ApiResponse(responseCode = "200", description = "Lead recuperado com sucesso."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Lead nao encontrado.",
+                    description = "Lead não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -106,7 +106,7 @@ public class LeadController {
             @ApiResponse(responseCode = "201", description = "Lead criado com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para criacao do lead.",
+                    description = "Payload inválido para criação do lead.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             )
     })
@@ -138,12 +138,12 @@ public class LeadController {
             @ApiResponse(responseCode = "200", description = "Lead atualizado com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para atualizacao do lead.",
+                    description = "Payload inválido para atualização do lead.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Lead nao encontrado.",
+                    description = "Lead não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -169,7 +169,7 @@ public class LeadController {
             @ApiResponse(responseCode = "403", description = "Acesso negado para remover leads."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Lead nao encontrado.",
+                    description = "Lead não encontrado.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })

@@ -14,6 +14,6 @@ public record OpportunityCloseDTO(
         Boolean win,
 
         // Se for win = false, o lossReason deveria ser preenchido (você pode validar isso no Service!)
-        @Schema(example = "Blue Corp adiou a contratacao para o proximo trimestre.")
+        @Schema(example = "Blue Corp adiou a contratação para o próximo trimestre.")
         String lossReason
 ) {}

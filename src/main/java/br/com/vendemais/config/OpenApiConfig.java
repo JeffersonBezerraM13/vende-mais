@@ -45,14 +45,14 @@ public class OpenApiConfig {
                         .title("VendeMais API")
                         .version("v1")
                         .description("""
-                                O VendeMais e uma API backend para gestao comercial (CRM) construida para organizar o fluxo de vendas de forma estruturada.
+                                O VendeMais é uma API backend para gestão comercial (CRM) construída para organizar o fluxo de vendas de forma estruturada.
                                 O sistema trabalha com o funil de vendas abrangendo as entidades Lead, Opportunity, Pipeline, Stage, Task e User.
-                                A arquitetura separa DTOs por intencao de uso, incluindo fluxos especificos como o fechamento de oportunidades, e utiliza autenticacao stateless via JWT.
+                                A arquitetura separa DTOs por intenção de uso, incluindo fluxos específicos como o fechamento de oportunidades, e utiliza autenticação stateless via JWT.
                                 """))
                 .path("/login", new PathItem().post(new io.swagger.v3.oas.models.Operation()
-                        .tags(List.of("Autenticacao"))
-                        .summary("Autentica um usuario e retorna um JWT")
-                        .description("Endpoint publico de login. Envie email e senha no corpo da requisicao e utilize o token retornado no header Authorization para autorizar os demais endpoints.")
+                        .tags(List.of("Autenticação"))
+                        .summary("Autentica um usuário e retorna um JWT")
+                        .description("Endpoint público de login. Envie email e senha no corpo da requisição e utilize o token retornado no header Authorization para autorizar os demais endpoints.")
                         .requestBody(new RequestBody()
                                 .required(true)
                                 .content(new Content().addMediaType(
@@ -61,12 +61,12 @@ public class OpenApiConfig {
                                 )))
                         .responses(new ApiResponses()
                                 .addApiResponse("200", new io.swagger.v3.oas.models.responses.ApiResponse()
-                                        .description("Autenticacao realizada com sucesso. O JWT e retornado no header Authorization.")
+                                        .description("Autenticação realizada com sucesso. O JWT é retornado no header Authorization.")
                                         .addHeaderObject("Authorization", new Header()
                                                 .description("Token JWT no formato Bearer")
                                                 .schema(new StringSchema().example("Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlaW5zdGVpbkBnbWFpbC5jb20iLCJleHAiOjE5OTk5OTk5OTl9.signature"))))
                                 .addApiResponse("401", new io.swagger.v3.oas.models.responses.ApiResponse()
-                                        .description("Email ou senha invalidos.")
+                                        .description("Email ou senha inválidos.")
                                         .content(new Content().addMediaType(
                                                 org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
                                                 new MediaType().schema(new Schema<>().$ref("#/components/schemas/StandardError"))

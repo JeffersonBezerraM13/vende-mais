@@ -35,7 +35,7 @@ import java.net.URI;
  */
 @RestController
 @RequestMapping("/tasks")
-@Tag(name = "Tasks", description = "Gestao de tarefas vinculadas a leads e oportunidades.")
+@Tag(name = "Tasks", description = "Gestão de tarefas vinculadas a leads e oportunidades.")
 @SecurityRequirement(name = "bearerAuth")
 public class TaskController {
 
@@ -84,7 +84,7 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Tarefa recuperada com sucesso."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Tarefa nao encontrada.",
+                    description = "Tarefa não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -107,7 +107,7 @@ public class TaskController {
             @ApiResponse(responseCode = "201", description = "Tarefa criada com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para criacao da tarefa.",
+                    description = "Payload inválido para criação da tarefa.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             )
     })
@@ -140,12 +140,12 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Tarefa atualizada com sucesso."),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Payload invalido para atualizacao da tarefa.",
+                    description = "Payload inválido para atualização da tarefa.",
                     content = @Content(schema = @Schema(implementation = ValidationError.class))
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Tarefa nao encontrada.",
+                    description = "Tarefa não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })
@@ -170,7 +170,7 @@ public class TaskController {
             @ApiResponse(responseCode = "204", description = "Tarefa removida com sucesso."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Tarefa nao encontrada.",
+                    description = "Tarefa não encontrada.",
                     content = @Content(schema = @Schema(implementation = StandardError.class))
             )
     })

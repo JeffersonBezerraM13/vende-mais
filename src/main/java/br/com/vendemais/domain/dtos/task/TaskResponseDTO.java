@@ -8,7 +8,7 @@ import java.time.LocalDate;
 /**
  * Represents a scheduled CRM task returned to API consumers.
  */
-@Schema(name = "TaskResponseDTO", description = "Representacao de tarefa retornada pela API.")
+@Schema(name = "TaskResponseDTO", description = "Representação de tarefa retornada pela API.")
 public record TaskResponseDTO(
         @Schema(example = "1")
         Long id,
@@ -16,7 +16,7 @@ public record TaskResponseDTO(
         Long userId,
         @Schema(example = "Ligar para Bob Blue")
         String title,
-        @Schema(example = "Validar a urgencia da Blue Corp para contratar Coworking.")
+        @Schema(example = "Validar a urgência da Blue Corp para contratar Coworking.")
         String description,
         @Schema(example = "PENDING")
         TaskStatus taskStatus,
