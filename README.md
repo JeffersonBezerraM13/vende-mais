@@ -3,7 +3,7 @@
 
 # VendeMais CRM
 
-Backend de CRM comercial desenvolvido com Spring Boot para gerenciar usuários, leads, oportunidades, funis, etapas e tarefas, com autenticação JWT, documentação OpenAPI e ambiente de demonstração com H2.
+Backend de CRM comercial desenvolvido com Spring Boot para gerenciar usuários, leads, oportunidades, funis, etapas e tarefas, com autenticação JWT, documentação OpenAPI, ambiente de demonstração com H2 e suporte a execução via Docker.
 
 ## Visão geral da arquitetura
 
@@ -28,6 +28,8 @@ O projeto segue uma arquitetura monolítica em camadas, com responsabilidades se
 | Persistência | Spring Data JPA, H2 Database |
 | Documentação | Swagger / OpenAPI (`springdoc-openapi`) |
 | Testes | JUnit 5, Mockito, MockMvc, Spring Security Test |
+| Build | Maven / Maven Wrapper |
+| Containerização | Docker |
 
 ## Principais módulos
 
@@ -77,10 +79,16 @@ O projeto segue uma arquitetura monolítica em camadas, com responsabilidades se
 
 ### Pré-requisitos
 
+Para execução local sem container:
+
 - Java 21
 - Maven 3.9+ ou Maven Wrapper
 
-### 1. Defina as variáveis de ambiente
+Para execução com container:
+
+- Docker instalado e em execução
+
+### Variáveis de ambiente
 
 Use valores seguros de exemplo. Não reutilize segredos reais em ambiente local ou compartilhado.
 
@@ -95,7 +103,67 @@ RANDOM_USER_API_URL=https://randomuser.me
 RANDOM_USER_API_PATH=/api/
 ```
 
-### 2. Execute a aplicação
+> No profile `demo`, o projeto usa H2 e carrega dados de demonstração automaticamente, facilitando a avaliação sem dependência de banco externo.
+
+### Opção 1 — Rodando com Docker
+
+A aplicação pode ser executada em container para reduzir dependências locais. O build Docker compila o backend e sobe a aplicação expondo a porta `8080`.
+
+Crie a imagem:
+
+```bash
+docker build -t vendemais-crm-backend .
+```
+
+Execute o container:
+
+```bash
+docker run --rm \
+  --name vendemais-crm-backend \
+  -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=demo \
+  -e JWT_SECRET=your-base64-secret-here \
+  -e JWT_EXPIRATION=86400000 \
+  -e DB_URL="jdbc:h2:mem:vendemais;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE" \
+  -e DB_USERNAME=sa \
+  -e DB_PASSWORD=change-me \
+  -e RANDOM_USER_API_URL=https://randomuser.me \
+  -e RANDOM_USER_API_PATH=/api/ \
+  vendemais-crm-backend
+```
+
+No Windows PowerShell:
+
+```powershell
+docker run --rm `
+  --name vendemais-crm-backend `
+  -p 8080:8080 `
+  -e SPRING_PROFILES_ACTIVE=demo `
+  -e JWT_SECRET=your-base64-secret-here `
+  -e JWT_EXPIRATION=86400000 `
+  -e DB_URL="jdbc:h2:mem:vendemais;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE" `
+  -e DB_USERNAME=sa `
+  -e DB_PASSWORD=change-me `
+  -e RANDOM_USER_API_URL=https://randomuser.me `
+  -e RANDOM_USER_API_PATH=/api/ `
+  vendemais-crm-backend
+```
+
+> Na primeira execução, o build pode demorar mais porque o Docker precisa baixar dependências do Maven e montar as camadas da imagem.
+
+Se o repositório possuir um arquivo `compose.yaml` ou `docker-compose.yml`, também é possível subir a aplicação com:
+
+```bash
+docker compose up --build
+```
+
+Para encerrar:
+
+```bash
+docker compose down
+```
+
+### Opção 2 — Rodando com Maven
 
 Com Maven:
 
@@ -115,10 +183,12 @@ No Windows:
 .\mvnw.cmd spring-boot:run
 ```
 
-### 3. Acesse os recursos locais
+### Acesse os recursos locais
 
+- API base: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- OpenAPI YAML: `http://localhost:8080/v3/api-docs.yaml`
 - H2 Console: `http://localhost:8080/h2-console`
 
 ### Observações sobre o profile `demo`
@@ -126,6 +196,7 @@ No Windows:
 - O profile `demo` é o perfil esperado para avaliação local
 - Nesse perfil, a base é populada automaticamente com dados de demonstração
 - O banco configurado para demonstração é H2
+- O uso de Docker não muda o profile nem o contrato da API; ele apenas empacota a aplicação para execução mais previsível
 
 ## Variáveis de ambiente esperadas
 
@@ -167,7 +238,7 @@ O H2 foi escolhido para facilitar avaliação técnica, demonstração local e e
 
 # VendeMais CRM
 
-A Spring Boot CRM backend for managing users, leads, opportunities, pipelines, stages, and tasks, with JWT authentication, OpenAPI documentation, and an H2-based demo environment.
+A Spring Boot CRM backend for managing users, leads, opportunities, pipelines, stages, and tasks, with JWT authentication, OpenAPI documentation, an H2-based demo environment, and Docker execution support.
 
 ## Architecture overview
 
@@ -192,6 +263,8 @@ The project follows a layered monolithic architecture with responsibilities spli
 | Persistence | Spring Data JPA, H2 Database |
 | Documentation | Swagger / OpenAPI (`springdoc-openapi`) |
 | Testing | JUnit 5, Mockito, MockMvc, Spring Security Test |
+| Build | Maven / Maven Wrapper |
+| Containerization | Docker |
 
 ## Core modules
 
@@ -241,10 +314,16 @@ The project follows a layered monolithic architecture with responsibilities spli
 
 ### Prerequisites
 
+For local execution without containers:
+
 - Java 21
 - Maven 3.9+ or Maven Wrapper
 
-### 1. Define environment variables
+For container execution:
+
+- Docker installed and running
+
+### Environment variables
 
 Use safe placeholder values. Do not reuse real secrets in local or shared environments.
 
@@ -259,7 +338,67 @@ RANDOM_USER_API_URL=https://randomuser.me
 RANDOM_USER_API_PATH=/api/
 ```
 
-### 2. Start the application
+> In the `demo` profile, the project uses H2 and automatically seeds demo data, making evaluation possible without an external database dependency.
+
+### Option 1 — Running with Docker
+
+The application can run in a container to reduce local setup requirements. The Docker build compiles the backend and starts the application on port `8080`.
+
+Build the image:
+
+```bash
+docker build -t vendemais-crm-backend .
+```
+
+Run the container:
+
+```bash
+docker run --rm \
+  --name vendemais-crm-backend \
+  -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=demo \
+  -e JWT_SECRET=your-base64-secret-here \
+  -e JWT_EXPIRATION=86400000 \
+  -e DB_URL="jdbc:h2:mem:vendemais;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE" \
+  -e DB_USERNAME=sa \
+  -e DB_PASSWORD=change-me \
+  -e RANDOM_USER_API_URL=https://randomuser.me \
+  -e RANDOM_USER_API_PATH=/api/ \
+  vendemais-crm-backend
+```
+
+On Windows PowerShell:
+
+```powershell
+docker run --rm `
+  --name vendemais-crm-backend `
+  -p 8080:8080 `
+  -e SPRING_PROFILES_ACTIVE=demo `
+  -e JWT_SECRET=your-base64-secret-here `
+  -e JWT_EXPIRATION=86400000 `
+  -e DB_URL="jdbc:h2:mem:vendemais;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE" `
+  -e DB_USERNAME=sa `
+  -e DB_PASSWORD=change-me `
+  -e RANDOM_USER_API_URL=https://randomuser.me `
+  -e RANDOM_USER_API_PATH=/api/ `
+  vendemais-crm-backend
+```
+
+> The first Docker build may take longer because Docker needs to download Maven dependencies and create the image layers.
+
+If the repository includes a `compose.yaml` or `docker-compose.yml` file, the application can also be started with:
+
+```bash
+docker compose up --build
+```
+
+To stop it:
+
+```bash
+docker compose down
+```
+
+### Option 2 — Running with Maven
 
 With Maven:
 
@@ -279,10 +418,12 @@ On Windows:
 .\mvnw.cmd spring-boot:run
 ```
 
-### 3. Open local resources
+### Open local resources
 
+- Base API: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- OpenAPI YAML: `http://localhost:8080/v3/api-docs.yaml`
 - H2 Console: `http://localhost:8080/h2-console`
 
 ### Notes about the `demo` profile
@@ -290,6 +431,7 @@ On Windows:
 - `demo` is the expected profile for local evaluation
 - In this profile, the database is automatically seeded with demo data
 - The demo database uses H2
+- Docker does not change the active profile or the API contract; it only packages the application for more predictable execution
 
 ## Expected environment variables
 

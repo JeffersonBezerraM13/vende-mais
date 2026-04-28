@@ -1,0 +1,21 @@
+services:
+  vendemais-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vendemais-crm-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
+
+      DB_URL: ${DB_URL:-jdbc:h2:mem:vendemaisdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+      DB_USERNAME: ${DB_USERNAME:-sa}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+
+      RANDOM_USER_API_URL: ${RANDOM_USER_API_URL:-https://randomuser.me}
+      RANDOM_USER_API_PATH: ${RANDOM_USER_API_PATH:-/api/}
+    restart: unless-stopped

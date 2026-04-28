@@ -5,7 +5,7 @@ spring:
     name: vende-mais-back
 
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE}
+    active: ${SPRING_PROFILES_ACTIVE:demo}
 
   jpa:
     open-in-view: true
